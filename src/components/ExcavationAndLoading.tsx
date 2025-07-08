@@ -43,7 +43,10 @@ export default function ExcavationAndLoading({
   modifiedThickness,
 }: ExcavationAndLoadingProps) {
   // 지형 선택 상태 추가
-  const [terrainType, setTerrainType] = useState<'평면' | '사면'>('평면');
+  const [terrainType, setTerrainType] = useState<'평면' | '사면' | ''>('');
+
+  // 입력 완료 상태 추가
+  const [isInputComplete, setIsInputComplete] = useState(false);
 
   // 면적 입력값
   const [area, setArea] = useState<number>(213.23);
@@ -499,7 +502,7 @@ export default function ExcavationAndLoading({
     <div className="space-y-6">
       {/* 지형 선택 */}
       <div className="bg-gray-100 p-4 rounded-lg">
-        <h3 className="font-bold text-sm mb-3">지형 선택</h3>
+        <h3 className="font-bold text-sm mb-3">4-1. 지형 선택</h3>
         <div className="flex gap-4">
           <label className="flex items-center">
             <input
@@ -507,9 +510,10 @@ export default function ExcavationAndLoading({
               name="terrain"
               value="평면"
               checked={terrainType === '평면'}
-              onChange={(e) =>
-                setTerrainType(e.target.value as '평면' | '사면')
-              }
+              onChange={(e) => {
+                setTerrainType(e.target.value as '평면' | '사면');
+                setIsInputComplete(false); // 지형 변경시 입력 상태 초기화
+              }}
               className="mr-2"
             />
             <span className="text-sm">평면</span>
@@ -520,9 +524,10 @@ export default function ExcavationAndLoading({
               name="terrain"
               value="사면"
               checked={terrainType === '사면'}
-              onChange={(e) =>
-                setTerrainType(e.target.value as '평면' | '사면')
-              }
+              onChange={(e) => {
+                setTerrainType(e.target.value as '평면' | '사면');
+                setIsInputComplete(false); // 지형 변경시 입력 상태 초기화
+              }}
               className="mr-2"
             />
             <span className="text-sm">사면</span>
@@ -535,7 +540,7 @@ export default function ExcavationAndLoading({
         <div>
           {/* P 구간 입력 폼 */}
           <div className="bg-blue-50 p-4 rounded-lg space-y-4">
-            <h3 className="font-bold text-sm mb-2">P 구간</h3>
+            <h3 className="font-bold text-sm mb-2">4-2. P 구간 입력</h3>
             <div className="grid grid-cols-2 gap-4">
               {/* 면적 입력 */}
               <div>
@@ -591,284 +596,316 @@ export default function ExcavationAndLoading({
             </div>
           </div>
 
-          {/* P 구간 테이블 */}
-          <div className="overflow-x-auto mt-4">
-            <table className="min-w-full border-collapse text-xs">
-              <thead>
-                <tr className="bg-cyan-400">
-                  <th
-                    className="border border-gray-400 px-2 py-1"
-                    rowSpan={2}
-                    colSpan={2}
-                  >
-                    구간
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1" rowSpan={2}>
-                    구분
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1" rowSpan={2}>
-                    항목
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1" colSpan={3}>
-                    토량
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1" rowSpan={2}>
-                    산출값
-                    <br />
-                    (m³)
-                  </th>
-                </tr>
-                <tr className="bg-cyan-400">
-                  <th className="border border-gray-400 px-2 py-1">
-                    면적
-                    <br />
-                    (m²)
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1">
-                    수정층후
-                    <br />
-                    (m)
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1">
-                    적용률
-                    <br />
-                    (%)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {sections
-                  .filter((section) => section.type === 'p')
-                  .map((section) => (
-                    <React.Fragment key={section.name}>
-                      {section.rows.map((row, rowIndex) => {
-                        const isFirstRow = rowIndex === 0;
+          {/* 입력 확인 버튼 */}
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={() => setIsInputComplete(true)}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+              입력 완료
+            </button>
+          </div>
 
-                        return (
-                          <tr key={row.id}>
-                            {isFirstRow && (
-                              <>
-                                <td
-                                  className="border border-gray-400 px-4 py-1 bg-yellow-200 text-center font-bold"
-                                  rowSpan={section.rows.length}
-                                  style={{ minWidth: '60px' }}
-                                >
-                                  {section.type.toUpperCase()}
-                                </td>
-                                <td
-                                  className="border border-gray-400 px-2 py-1 bg-yellow-100"
-                                  rowSpan={section.rows.length}
-                                >
+          {/* P 구간 테이블 - 입력 완료시에만 표시 */}
+          {isInputComplete && (
+            <>
+              <h3 className="font-bold text-sm mt-4 mb-2">
+                4-3. 구간 P 테이블
+              </h3>
+              <div className="overflow-x-auto mt-4">
+                <table className="min-w-full border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-cyan-400">
+                      <th
+                        className="border border-gray-400 px-2 py-1"
+                        rowSpan={2}
+                        colSpan={2}
+                      >
+                        구간
+                      </th>
+                      <th
+                        className="border border-gray-400 px-2 py-1"
+                        rowSpan={2}
+                      >
+                        구분
+                      </th>
+                      <th
+                        className="border border-gray-400 px-2 py-1"
+                        rowSpan={2}
+                      >
+                        항목
+                      </th>
+                      <th
+                        className="border border-gray-400 px-2 py-1"
+                        colSpan={3}
+                      >
+                        토량
+                      </th>
+                      <th
+                        className="border border-gray-400 px-2 py-1"
+                        rowSpan={2}
+                      >
+                        산출값
+                        <br />
+                        (m³)
+                      </th>
+                    </tr>
+                    <tr className="bg-cyan-400">
+                      <th className="border border-gray-400 px-2 py-1">
+                        면적
+                        <br />
+                        (m²)
+                      </th>
+                      <th className="border border-gray-400 px-2 py-1">
+                        수정층후
+                        <br />
+                        (m)
+                      </th>
+                      <th className="border border-gray-400 px-2 py-1">
+                        적용률
+                        <br />
+                        (%)
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sections
+                      .filter((section) => section.type === 'p')
+                      .map((section) => (
+                        <React.Fragment key={section.name}>
+                          {section.rows.map((row, rowIndex) => {
+                            const isFirstRow = rowIndex === 0;
+
+                            return (
+                              <tr key={row.id}>
+                                {isFirstRow && (
+                                  <>
+                                    <td
+                                      className="border border-gray-400 px-4 py-1 bg-yellow-200 text-center font-bold"
+                                      rowSpan={section.rows.length}
+                                      style={{ minWidth: '60px' }}
+                                    >
+                                      {section.type.toUpperCase()}
+                                    </td>
+                                    <td
+                                      className="border border-gray-400 px-2 py-1 bg-yellow-100"
+                                      rowSpan={section.rows.length}
+                                    >
+                                      <input
+                                        type="text"
+                                        value={section.sectionText || ''}
+                                        onChange={(e) => {
+                                          const newSections = sections.map(
+                                            (s) =>
+                                              s.name === section.name
+                                                ? {
+                                                    ...s,
+                                                    sectionText: e.target.value,
+                                                  }
+                                                : s
+                                          );
+                                          setSections(newSections);
+                                        }}
+                                        className="w-full px-1 py-0.5 text-center border-0 outline-none bg-transparent"
+                                      />
+                                    </td>
+                                    <td
+                                      className="border border-gray-400 px-1 py-1 bg-yellow-200"
+                                      rowSpan={section.rows.length}
+                                    >
+                                      <div className="space-y-1">
+                                        {section.rows.map((sectionRow, idx) => (
+                                          <div key={idx}>
+                                            <div
+                                              className="flex items-center space-x-1 pb-1"
+                                              style={{
+                                                borderBottom:
+                                                  idx < section.rows.length - 1
+                                                    ? '1px solid #9ca3af'
+                                                    : 'none',
+                                              }}
+                                            >
+                                              <input
+                                                type="text"
+                                                value={sectionRow.sectionNumber}
+                                                onChange={(e) =>
+                                                  updateRow(
+                                                    section.name,
+                                                    sectionRow.id,
+                                                    'sectionNumber',
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="w-8 text-center border-0 bg-transparent"
+                                              />
+                                              <input
+                                                type="text"
+                                                value={sectionRow.rockType}
+                                                onChange={(e) =>
+                                                  updateRow(
+                                                    section.name,
+                                                    sectionRow.id,
+                                                    'rockType',
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="w-16 text-xs border-0 bg-transparent"
+                                              />
+                                              <select
+                                                value={sectionRow.workType}
+                                                onChange={(e) =>
+                                                  updateRow(
+                                                    section.name,
+                                                    sectionRow.id,
+                                                    'workType',
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="w-10 text-xs border-0 bg-transparent"
+                                              >
+                                                <option value="직">직</option>
+                                                <option value="크">크</option>
+                                              </select>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </td>
+                                  </>
+                                )}
+                                <td className="border border-gray-400 px-1 py-1">
                                   <input
                                     type="text"
-                                    value={section.sectionText || ''}
-                                    onChange={(e) => {
-                                      const newSections = sections.map((s) =>
-                                        s.name === section.name
-                                          ? {
-                                              ...s,
-                                              sectionText: e.target.value,
-                                            }
-                                          : s
-                                      );
-                                      setSections(newSections);
-                                    }}
-                                    className="w-full px-1 py-0.5 text-center border-0 outline-none bg-transparent"
+                                    value={row.item}
+                                    onChange={(e) =>
+                                      updateRow(
+                                        section.name,
+                                        row.id,
+                                        'item',
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-full px-1 py-0.5 text-center border-0 outline-none"
+                                  />
+                                </td>
+                                <td className="border border-gray-400 px-1 py-1 bg-yellow-100">
+                                  <input
+                                    type="number"
+                                    value={row.area}
+                                    onChange={(e) =>
+                                      updateRow(
+                                        section.name,
+                                        row.id,
+                                        'area',
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-16 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
+                                    step="0.01"
                                   />
                                 </td>
                                 <td
-                                  className="border border-gray-400 px-1 py-1 bg-yellow-200"
-                                  rowSpan={section.rows.length}
+                                  className={`border border-gray-400 px-2 py-1 text-center ${
+                                    rowIndex === 0
+                                      ? 'bg-yellow-100'
+                                      : 'bg-gray-300'
+                                  }`}
                                 >
-                                  <div className="space-y-1">
-                                    {section.rows.map((sectionRow, idx) => (
-                                      <div key={idx}>
-                                        <div
-                                          className="flex items-center space-x-1 pb-1"
-                                          style={{
-                                            borderBottom:
-                                              idx < section.rows.length - 1
-                                                ? '1px solid #9ca3af'
-                                                : 'none',
-                                          }}
-                                        >
-                                          <input
-                                            type="text"
-                                            value={sectionRow.sectionNumber}
-                                            onChange={(e) =>
-                                              updateRow(
-                                                section.name,
-                                                sectionRow.id,
-                                                'sectionNumber',
-                                                e.target.value
-                                              )
-                                            }
-                                            className="w-8 text-center border-0 bg-transparent"
-                                          />
-                                          <input
-                                            type="text"
-                                            value={sectionRow.rockType}
-                                            onChange={(e) =>
-                                              updateRow(
-                                                section.name,
-                                                sectionRow.id,
-                                                'rockType',
-                                                e.target.value
-                                              )
-                                            }
-                                            className="w-16 text-xs border-0 bg-transparent"
-                                          />
-                                          <select
-                                            value={sectionRow.workType}
-                                            onChange={(e) =>
-                                              updateRow(
-                                                section.name,
-                                                sectionRow.id,
-                                                'workType',
-                                                e.target.value
-                                              )
-                                            }
-                                            className="w-10 text-xs border-0 bg-transparent"
-                                          >
-                                            <option value="직">직</option>
-                                            <option value="크">크</option>
-                                          </select>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
+                                  {rowIndex === 0 ? (
+                                    <input
+                                      type="number"
+                                      value={row.modifiedThickness}
+                                      onChange={(e) =>
+                                        updateRow(
+                                          section.name,
+                                          row.id,
+                                          'modifiedThickness',
+                                          e.target.value
+                                        )
+                                      }
+                                      className="w-16 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
+                                      step="0.01"
+                                    />
+                                  ) : (
+                                    row.modifiedThickness.toFixed(2)
+                                  )}
                                 </td>
-                              </>
-                            )}
-                            <td className="border border-gray-400 px-1 py-1">
-                              <input
-                                type="text"
-                                value={row.item}
-                                onChange={(e) =>
-                                  updateRow(
-                                    section.name,
-                                    row.id,
-                                    'item',
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full px-1 py-0.5 text-center border-0 outline-none"
-                              />
-                            </td>
-                            <td className="border border-gray-400 px-1 py-1 bg-yellow-100">
-                              <input
-                                type="number"
-                                value={row.area}
-                                onChange={(e) =>
-                                  updateRow(
-                                    section.name,
-                                    row.id,
-                                    'area',
-                                    e.target.value
-                                  )
-                                }
-                                className="w-16 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
-                                step="0.01"
-                              />
-                            </td>
+                                <td className="border border-gray-400 px-1 py-1 bg-yellow-100">
+                                  <input
+                                    type="number"
+                                    value={row.applicationRate}
+                                    onChange={(e) =>
+                                      updateRow(
+                                        section.name,
+                                        row.id,
+                                        'applicationRate',
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-12 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
+                                    step="1"
+                                    min="0"
+                                    max="100"
+                                  />
+                                </td>
+                                <td className="border border-gray-400 px-2 py-1 text-center font-medium">
+                                  {row.volume}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {/* P 구간 소계 */}
+                          <tr className="bg-blue-100">
                             <td
-                              className={`border border-gray-400 px-2 py-1 text-center ${
-                                rowIndex === 0 ? 'bg-yellow-100' : 'bg-gray-300'
-                              }`}
+                              colSpan={7}
+                              className="border border-gray-400 px-2 py-1 text-right"
                             >
-                              {rowIndex === 0 ? (
-                                <input
-                                  type="number"
-                                  value={row.modifiedThickness}
-                                  onChange={(e) =>
-                                    updateRow(
-                                      section.name,
-                                      row.id,
-                                      'modifiedThickness',
-                                      e.target.value
-                                    )
-                                  }
-                                  className="w-16 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
-                                  step="0.01"
-                                />
-                              ) : (
-                                row.modifiedThickness.toFixed(2)
-                              )}
+                              구간 P {section.sectionText || ''} 소계:
                             </td>
-                            <td className="border border-gray-400 px-1 py-1 bg-yellow-100">
-                              <input
-                                type="number"
-                                value={row.applicationRate}
-                                onChange={(e) =>
-                                  updateRow(
-                                    section.name,
-                                    row.id,
-                                    'applicationRate',
-                                    e.target.value
-                                  )
-                                }
-                                className="w-12 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
-                                step="1"
-                                min="0"
-                                max="100"
-                              />
-                            </td>
-                            <td className="border border-gray-400 px-2 py-1 text-center font-medium">
-                              {row.volume}
+                            <td className="border border-gray-400 px-2 py-1 text-center font-bold">
+                              {getSectionTotal(section)}
                             </td>
                           </tr>
-                        );
-                      })}
-                      {/* P 구간 소계 */}
-                      <tr className="bg-blue-100">
-                        <td
-                          colSpan={7}
-                          className="border border-gray-400 px-2 py-1 text-right"
-                        >
-                          구간 P {section.sectionText || ''} 소계:
-                        </td>
-                        <td className="border border-gray-400 px-2 py-1 text-center font-bold">
-                          {getSectionTotal(section)}
-                        </td>
-                      </tr>
-                      {/* 구간 추가/삭제 버튼 */}
-                      <tr>
-                        <td
-                          colSpan={8}
-                          className="border border-gray-400 px-2 py-2 text-center"
-                        >
-                          <div className="flex justify-center gap-2">
-                            <button
-                              onClick={addSection}
-                              className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                          {/* 구간 추가/삭제 버튼 */}
+                          <tr>
+                            <td
+                              colSpan={8}
+                              className="border border-gray-400 px-2 py-2 text-center"
                             >
-                              구간 추가
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (
-                                  sections.filter((s) => s.type === 'p')
-                                    .length > 1
-                                ) {
-                                  setSections(
-                                    sections.filter(
-                                      (s) => s.name !== section.name
-                                    )
-                                  );
-                                }
-                              }}
-                              className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
-                            >
-                              구간 삭제
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    </React.Fragment>
-                  ))}
-              </tbody>
-            </table>
-          </div>
+                              <div className="flex justify-center gap-2">
+                                <button
+                                  onClick={addSection}
+                                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                                >
+                                  구간 추가
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (
+                                      sections.filter((s) => s.type === 'p')
+                                        .length > 1
+                                    ) {
+                                      setSections(
+                                        sections.filter(
+                                          (s) => s.name !== section.name
+                                        )
+                                      );
+                                    }
+                                  }}
+                                  className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                                >
+                                  구간 삭제
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        </React.Fragment>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -877,7 +914,7 @@ export default function ExcavationAndLoading({
         <div>
           {/* S 구간 입력 폼 */}
           <div className="bg-green-50 p-4 rounded-lg space-y-4">
-            <h3 className="font-bold text-sm mb-2">S 구간 (1-2)</h3>
+            <h3 className="font-bold text-sm mb-2">4-2. S 구간 (1-2) 입력</h3>
             <div className="grid grid-cols-2 gap-4">
               {/* 면적 입력 */}
               <div>
@@ -953,468 +990,510 @@ export default function ExcavationAndLoading({
             </div>
           </div>
 
-          {/* S 구간 테이블 */}
-          <div className="overflow-x-auto mt-4">
-            <table className="min-w-full border-collapse text-xs">
-              <thead>
-                <tr className="bg-cyan-400">
-                  <th
-                    className="border border-gray-400 px-2 py-1"
-                    rowSpan={2}
-                    colSpan={2}
-                  >
-                    구간
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1" rowSpan={2}>
-                    구분
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1" rowSpan={2}>
-                    항목
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1" colSpan={3}>
-                    토량
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1" rowSpan={2}>
-                    산출값
-                    <br />
-                    (m³)
-                  </th>
-                </tr>
-                <tr className="bg-cyan-400">
-                  <th className="border border-gray-400 px-2 py-1">
-                    면적
-                    <br />
-                    (m²)
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1">
-                    수정층후
-                    <br />
-                    (m)
-                  </th>
-                  <th className="border border-gray-400 px-2 py-1">
-                    적용률
-                    <br />
-                    (%)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {sections
-                  .filter((section) => section.type === 's')
-                  .map((section) => (
-                    <React.Fragment key={section.name}>
-                      {section.rows.map((row, rowIndex) => {
-                        const isFirstRow = rowIndex === 0;
+          {/* 입력 확인 버튼 */}
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={() => setIsInputComplete(true)}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+              입력 완료
+            </button>
+          </div>
 
-                        return (
-                          <tr key={row.id}>
-                            {isFirstRow && (
-                              <>
-                                <td
-                                  className="border border-gray-400 px-4 py-1 bg-yellow-200 text-center font-bold"
-                                  rowSpan={section.rows.length}
-                                  style={{ minWidth: '60px' }}
-                                >
-                                  {section.type.toUpperCase()}
-                                </td>
-                                <td
-                                  className="border border-gray-400 px-2 py-1 bg-yellow-100"
-                                  rowSpan={section.rows.length}
-                                >
+          {/* S 구간 테이블 - 입력 완료시에만 표시 */}
+          {isInputComplete && (
+            <>
+              <h3 className="font-bold text-sm mt-4 mb-2">
+                4-3. 구간 S 테이블
+              </h3>
+              <div className="overflow-x-auto mt-4">
+                <table className="min-w-full border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-cyan-400">
+                      <th
+                        className="border border-gray-400 px-2 py-1"
+                        rowSpan={2}
+                        colSpan={2}
+                      >
+                        구간
+                      </th>
+                      <th
+                        className="border border-gray-400 px-2 py-1"
+                        rowSpan={2}
+                      >
+                        구분
+                      </th>
+                      <th
+                        className="border border-gray-400 px-2 py-1"
+                        rowSpan={2}
+                      >
+                        항목
+                      </th>
+                      <th
+                        className="border border-gray-400 px-2 py-1"
+                        colSpan={3}
+                      >
+                        토량
+                      </th>
+                      <th
+                        className="border border-gray-400 px-2 py-1"
+                        rowSpan={2}
+                      >
+                        산출값
+                        <br />
+                        (m³)
+                      </th>
+                    </tr>
+                    <tr className="bg-cyan-400">
+                      <th className="border border-gray-400 px-2 py-1">
+                        면적
+                        <br />
+                        (m²)
+                      </th>
+                      <th className="border border-gray-400 px-2 py-1">
+                        수정층후
+                        <br />
+                        (m)
+                      </th>
+                      <th className="border border-gray-400 px-2 py-1">
+                        적용률
+                        <br />
+                        (%)
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sections
+                      .filter((section) => section.type === 's')
+                      .map((section) => (
+                        <React.Fragment key={section.name}>
+                          {section.rows.map((row, rowIndex) => {
+                            const isFirstRow = rowIndex === 0;
+
+                            return (
+                              <tr key={row.id}>
+                                {isFirstRow && (
+                                  <>
+                                    <td
+                                      className="border border-gray-400 px-4 py-1 bg-yellow-200 text-center font-bold"
+                                      rowSpan={section.rows.length}
+                                      style={{ minWidth: '60px' }}
+                                    >
+                                      {section.type.toUpperCase()}
+                                    </td>
+                                    <td
+                                      className="border border-gray-400 px-2 py-1 bg-yellow-100"
+                                      rowSpan={section.rows.length}
+                                    >
+                                      <input
+                                        type="text"
+                                        value={section.sectionText || ''}
+                                        onChange={(e) => {
+                                          const newSections = sections.map(
+                                            (s) =>
+                                              s.name === section.name
+                                                ? {
+                                                    ...s,
+                                                    sectionText: e.target.value,
+                                                  }
+                                                : s
+                                          );
+                                          setSections(newSections);
+                                        }}
+                                        className="w-full px-1 py-0.5 text-center border-0 outline-none bg-transparent"
+                                      />
+                                    </td>
+                                    <td
+                                      className="border border-gray-400 px-1 py-1 bg-yellow-200"
+                                      rowSpan={section.rows.length}
+                                    >
+                                      <div className="space-y-1">
+                                        {section.rows.map((sectionRow, idx) => (
+                                          <div key={idx}>
+                                            <div
+                                              className="flex items-center space-x-1 pb-1"
+                                              style={{
+                                                borderBottom:
+                                                  idx < section.rows.length - 1
+                                                    ? '1px solid #9ca3af'
+                                                    : 'none',
+                                              }}
+                                            >
+                                              <input
+                                                type="text"
+                                                value={sectionRow.sectionNumber}
+                                                onChange={(e) =>
+                                                  updateRow(
+                                                    section.name,
+                                                    sectionRow.id,
+                                                    'sectionNumber',
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="w-8 text-center border-0 bg-transparent"
+                                              />
+                                              <input
+                                                type="text"
+                                                value={sectionRow.rockType}
+                                                onChange={(e) =>
+                                                  updateRow(
+                                                    section.name,
+                                                    sectionRow.id,
+                                                    'rockType',
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="w-16 text-xs border-0 bg-transparent"
+                                              />
+                                              <select
+                                                value={sectionRow.workType}
+                                                onChange={(e) =>
+                                                  updateRow(
+                                                    section.name,
+                                                    sectionRow.id,
+                                                    'workType',
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="w-10 text-xs border-0 bg-transparent"
+                                              >
+                                                <option value="직">직</option>
+                                                <option value="크">크</option>
+                                              </select>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </td>
+                                  </>
+                                )}
+                                <td className="border border-gray-400 px-1 py-1">
                                   <input
                                     type="text"
-                                    value={section.sectionText || ''}
-                                    onChange={(e) => {
-                                      const newSections = sections.map((s) =>
-                                        s.name === section.name
-                                          ? {
-                                              ...s,
-                                              sectionText: e.target.value,
-                                            }
-                                          : s
-                                      );
-                                      setSections(newSections);
-                                    }}
-                                    className="w-full px-1 py-0.5 text-center border-0 outline-none bg-transparent"
+                                    value={row.item}
+                                    onChange={(e) =>
+                                      updateRow(
+                                        section.name,
+                                        row.id,
+                                        'item',
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-full px-1 py-0.5 text-center border-0 outline-none"
+                                  />
+                                </td>
+                                <td className="border border-gray-400 px-1 py-1 bg-yellow-100">
+                                  <input
+                                    type="number"
+                                    value={row.area}
+                                    onChange={(e) =>
+                                      updateRow(
+                                        section.name,
+                                        row.id,
+                                        'area',
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-16 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
+                                    step="0.01"
                                   />
                                 </td>
                                 <td
-                                  className="border border-gray-400 px-1 py-1 bg-yellow-200"
-                                  rowSpan={section.rows.length}
+                                  className={`border border-gray-400 px-2 py-1 text-center ${
+                                    rowIndex === 0
+                                      ? 'bg-yellow-100'
+                                      : 'bg-gray-300'
+                                  }`}
                                 >
-                                  <div className="space-y-1">
-                                    {section.rows.map((sectionRow, idx) => (
-                                      <div key={idx}>
-                                        <div
-                                          className="flex items-center space-x-1 pb-1"
-                                          style={{
-                                            borderBottom:
-                                              idx < section.rows.length - 1
-                                                ? '1px solid #9ca3af'
-                                                : 'none',
-                                          }}
-                                        >
-                                          <input
-                                            type="text"
-                                            value={sectionRow.sectionNumber}
-                                            onChange={(e) =>
-                                              updateRow(
-                                                section.name,
-                                                sectionRow.id,
-                                                'sectionNumber',
-                                                e.target.value
-                                              )
-                                            }
-                                            className="w-8 text-center border-0 bg-transparent"
-                                          />
-                                          <input
-                                            type="text"
-                                            value={sectionRow.rockType}
-                                            onChange={(e) =>
-                                              updateRow(
-                                                section.name,
-                                                sectionRow.id,
-                                                'rockType',
-                                                e.target.value
-                                              )
-                                            }
-                                            className="w-16 text-xs border-0 bg-transparent"
-                                          />
-                                          <select
-                                            value={sectionRow.workType}
-                                            onChange={(e) =>
-                                              updateRow(
-                                                section.name,
-                                                sectionRow.id,
-                                                'workType',
-                                                e.target.value
-                                              )
-                                            }
-                                            className="w-10 text-xs border-0 bg-transparent"
-                                          >
-                                            <option value="직">직</option>
-                                            <option value="크">크</option>
-                                          </select>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
+                                  {rowIndex === 0 ? (
+                                    <input
+                                      type="number"
+                                      value={row.modifiedThickness}
+                                      onChange={(e) =>
+                                        updateRow(
+                                          section.name,
+                                          row.id,
+                                          'modifiedThickness',
+                                          e.target.value
+                                        )
+                                      }
+                                      className="w-16 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
+                                      step="0.01"
+                                    />
+                                  ) : (
+                                    row.modifiedThickness.toFixed(2)
+                                  )}
                                 </td>
-                              </>
-                            )}
-                            <td className="border border-gray-400 px-1 py-1">
-                              <input
-                                type="text"
-                                value={row.item}
-                                onChange={(e) =>
-                                  updateRow(
-                                    section.name,
-                                    row.id,
-                                    'item',
-                                    e.target.value
-                                  )
-                                }
-                                className="w-full px-1 py-0.5 text-center border-0 outline-none"
-                              />
-                            </td>
-                            <td className="border border-gray-400 px-1 py-1 bg-yellow-100">
-                              <input
-                                type="number"
-                                value={row.area}
-                                onChange={(e) =>
-                                  updateRow(
-                                    section.name,
-                                    row.id,
-                                    'area',
-                                    e.target.value
-                                  )
-                                }
-                                className="w-16 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
-                                step="0.01"
-                              />
-                            </td>
+                                <td className="border border-gray-400 px-1 py-1 bg-yellow-100">
+                                  <input
+                                    type="number"
+                                    value={row.applicationRate}
+                                    onChange={(e) =>
+                                      updateRow(
+                                        section.name,
+                                        row.id,
+                                        'applicationRate',
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-12 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
+                                    step="1"
+                                    min="0"
+                                    max="100"
+                                  />
+                                </td>
+                                <td className="border border-gray-400 px-2 py-1 text-center font-medium">
+                                  {row.volume}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {/* S 구간 소계 */}
+                          <tr className="bg-blue-100">
                             <td
-                              className={`border border-gray-400 px-2 py-1 text-center ${
-                                rowIndex === 0 ? 'bg-yellow-100' : 'bg-gray-300'
-                              }`}
+                              colSpan={7}
+                              className="border border-gray-400 px-2 py-1 text-right"
                             >
-                              {rowIndex === 0 ? (
-                                <input
-                                  type="number"
-                                  value={row.modifiedThickness}
-                                  onChange={(e) =>
-                                    updateRow(
-                                      section.name,
-                                      row.id,
-                                      'modifiedThickness',
-                                      e.target.value
-                                    )
-                                  }
-                                  className="w-16 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
-                                  step="0.01"
-                                />
-                              ) : (
-                                row.modifiedThickness.toFixed(2)
-                              )}
+                              구간 S {section.sectionText || ''} 소계:
                             </td>
-                            <td className="border border-gray-400 px-1 py-1 bg-yellow-100">
-                              <input
-                                type="number"
-                                value={row.applicationRate}
-                                onChange={(e) =>
-                                  updateRow(
-                                    section.name,
-                                    row.id,
-                                    'applicationRate',
-                                    e.target.value
-                                  )
-                                }
-                                className="w-12 px-1 py-0.5 text-center bg-transparent border-0 outline-none"
-                                step="1"
-                                min="0"
-                                max="100"
-                              />
-                            </td>
-                            <td className="border border-gray-400 px-2 py-1 text-center font-medium">
-                              {row.volume}
+                            <td className="border border-gray-400 px-2 py-1 text-center font-bold">
+                              {getSectionTotal(section)}
                             </td>
                           </tr>
-                        );
-                      })}
-                      {/* S 구간 소계 */}
-                      <tr className="bg-blue-100">
-                        <td
-                          colSpan={7}
-                          className="border border-gray-400 px-2 py-1 text-right"
-                        >
-                          구간 S {section.sectionText || ''} 소계:
-                        </td>
-                        <td className="border border-gray-400 px-2 py-1 text-center font-bold">
-                          {getSectionTotal(section)}
-                        </td>
-                      </tr>
-                      {/* 구간 추가/삭제 버튼 */}
-                      <tr>
-                        <td
-                          colSpan={8}
-                          className="border border-gray-400 px-2 py-2 text-center"
-                        >
-                          <div className="flex justify-center gap-2">
-                            <button
-                              onClick={addSection}
-                              className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                          {/* 구간 추가/삭제 버튼 */}
+                          <tr>
+                            <td
+                              colSpan={8}
+                              className="border border-gray-400 px-2 py-2 text-center"
                             >
-                              구간 추가
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (
-                                  sections.filter((s) => s.type === 's')
-                                    .length > 1
-                                ) {
-                                  setSections(
-                                    sections.filter(
-                                      (s) => s.name !== section.name
-                                    )
-                                  );
-                                }
-                              }}
-                              className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
-                            >
-                              구간 삭제
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    </React.Fragment>
-                  ))}
-              </tbody>
-            </table>
+                              <div className="flex justify-center gap-2">
+                                <button
+                                  onClick={addSection}
+                                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                                >
+                                  구간 추가
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (
+                                      sections.filter((s) => s.type === 's')
+                                        .length > 1
+                                    ) {
+                                      setSections(
+                                        sections.filter(
+                                          (s) => s.name !== section.name
+                                        )
+                                      );
+                                    }
+                                  }}
+                                  className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                                >
+                                  구간 삭제
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        </React.Fragment>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* 전체 합계 (지형 선택 및 입력 완료시에만 표시) */}
+      {terrainType && isInputComplete && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full border-collapse text-xs">
+            <tbody>
+              <tr className="bg-gray-200">
+                <td
+                  colSpan={7}
+                  className="border border-gray-400 px-2 py-1 font-bold text-right"
+                >
+                  전체 합계:
+                </td>
+                <td className="border border-gray-400 px-2 py-1 text-center font-bold">
+                  {terrainType === '평면'
+                    ? sections
+                        .filter((section) => section.type === 'p')
+                        .reduce(
+                          (sum, section) =>
+                            sum +
+                            section.rows.reduce(
+                              (sectionSum, row) => sectionSum + row.volume,
+                              0
+                            ),
+                          0
+                        )
+                    : sections
+                        .filter((section) => section.type === 's')
+                        .reduce(
+                          (sum, section) =>
+                            sum +
+                            section.rows.reduce(
+                              (sectionSum, row) => sectionSum + row.volume,
+                              0
+                            ),
+                          0
+                        )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* 굴착깊이 검증 정보 (지형 선택 및 입력 완료시에만 표시) */}
+      {terrainType && isInputComplete && (
+        <div className="bg-yellow-50 p-4 rounded-lg space-y-2">
+          <h4 className="font-bold text-sm mb-2">수정층후 검증</h4>
+          <div className="text-xs space-y-1">
+            {terrainType === '평면' && (
+              <p>P 구간 목표 굴착길이: {excavationDepth.toFixed(2)}m</p>
+            )}
+            {terrainType === '사면' && (
+              <>
+                <p>
+                  S 구간 굴착길이1:{' '}
+                  {(originalGroundLevel + sExcavationLevel1).toFixed(2)}m
+                </p>
+                <p>
+                  S 구간 굴착길이2:{' '}
+                  {(originalGroundLevel + sExcavationLevel2).toFixed(2)}m
+                </p>
+              </>
+            )}
+            {sections
+              .filter(
+                (section) =>
+                  section.type === (terrainType === '평면' ? 'p' : 's')
+              )
+              .map((section) => {
+                if (section.type === 'p') {
+                  return (
+                    <div key={section.name}>
+                      <p>
+                        구간 P {section.sectionText || ''} 수정층후 합계:{' '}
+                        {getSectionThicknessTotal(section).toFixed(2)}m
+                      </p>
+                      <p
+                        className={
+                          Math.abs(
+                            getSectionThicknessTotal(section) - excavationDepth
+                          ) < 0.01
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }
+                      >
+                        검증:{' '}
+                        {Math.abs(
+                          getSectionThicknessTotal(section) - excavationDepth
+                        ) < 0.01
+                          ? 'TRUE'
+                          : 'FALSE'}
+                      </p>
+                    </div>
+                  );
+                } else {
+                  // S 구간은 1~4행과 1~5행 두 가지 검증
+                  const firstFourRowsTotal = section.rows
+                    .slice(0, 4)
+                    .reduce(
+                      (sum, row) => sum + Number(row.modifiedThickness),
+                      0
+                    );
+                  const allRowsTotal = getSectionThicknessTotal(section);
+                  const excavation1 = originalGroundLevel + sExcavationLevel1;
+                  const excavation2 = originalGroundLevel + sExcavationLevel2;
+
+                  return (
+                    <div key={section.name}>
+                      <p>
+                        구간 S {section.sectionText || ''} 수정층후 1~4행 합계:{' '}
+                        {firstFourRowsTotal.toFixed(2)}m
+                      </p>
+                      <p
+                        className={
+                          Math.abs(firstFourRowsTotal - excavation1) < 0.01
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }
+                      >
+                        1차 굴착 검증:{' '}
+                        {Math.abs(firstFourRowsTotal - excavation1) < 0.01
+                          ? 'TRUE'
+                          : 'FALSE'}
+                      </p>
+                      <p>
+                        구간 S {section.sectionText || ''} 수정층후 1~5행 합계:{' '}
+                        {allRowsTotal.toFixed(2)}m
+                      </p>
+                      <p
+                        className={
+                          Math.abs(allRowsTotal - excavation2) < 0.01
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }
+                      >
+                        최종 굴착 검증:{' '}
+                        {Math.abs(allRowsTotal - excavation2) < 0.01
+                          ? 'TRUE'
+                          : 'FALSE'}
+                      </p>
+                    </div>
+                  );
+                }
+              })}
           </div>
         </div>
       )}
 
-      {/* 전체 합계 (해당 지형에 따라 합계 계산) */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse text-xs">
-          <tbody>
-            <tr className="bg-gray-200">
-              <td
-                colSpan={7}
-                className="border border-gray-400 px-2 py-1 font-bold text-right"
-              >
-                전체 합계:
-              </td>
-              <td className="border border-gray-400 px-2 py-1 text-center font-bold">
-                {terrainType === '평면'
-                  ? sections
-                      .filter((section) => section.type === 'p')
-                      .reduce(
-                        (sum, section) =>
-                          sum +
-                          section.rows.reduce(
-                            (sectionSum, row) => sectionSum + row.volume,
-                            0
-                          ),
-                        0
-                      )
-                  : sections
-                      .filter((section) => section.type === 's')
-                      .reduce(
-                        (sum, section) =>
-                          sum +
-                          section.rows.reduce(
-                            (sectionSum, row) => sectionSum + row.volume,
-                            0
-                          ),
-                        0
-                      )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {/* 계산식 설명 (지형 선택 및 입력 완료시에만 표시) */}
+      {terrainType && isInputComplete && (
+        <div className="bg-green-100 p-4 rounded-lg text-xs space-y-2">
+          <h4 className="font-bold text-sm mb-2">수정층후 계산식</h4>
+          <div className="space-y-1">
+            {terrainType === '평면' && (
+              <>
+                <p className="font-medium">P 구간:</p>
+                <div className="ml-4 space-y-1">
+                  <p>
+                    매립토: MIN(MAX(0, 굴착깊이-원지반고), MAX(0,
+                    매립토두께-원지반고))
+                  </p>
+                  <p>
+                    풍화암: MIN(풍화암두께, MAX(0,
+                    굴착깊이-원지반고-매립토계산값))
+                  </p>
+                  <p>
+                    연암: MIN(연암두께, MAX(0,
+                    굴착깊이-원지반고-매립토계산값-풍화암계산값))
+                  </p>
+                </div>
+                <p className="mt-3 text-red-600 font-medium">
+                  P 구간: 수정층후 합계 = 굴착깊이
+                </p>
+              </>
+            )}
 
-      {/* 굴착깊이 검증 정보 */}
-      <div className="bg-yellow-50 p-4 rounded-lg space-y-2">
-        <h4 className="font-bold text-sm mb-2">수정층후 검증</h4>
-        <div className="text-xs space-y-1">
-          {terrainType === '평면' && (
-            <p>P 구간 목표 굴착길이: {excavationDepth.toFixed(2)}m</p>
-          )}
-          {terrainType === '사면' && (
-            <>
-              <p>
-                S 구간 굴착길이1:{' '}
-                {(originalGroundLevel + sExcavationLevel1).toFixed(2)}m
-              </p>
-              <p>
-                S 구간 굴착길이2:{' '}
-                {(originalGroundLevel + sExcavationLevel2).toFixed(2)}m
-              </p>
-            </>
-          )}
-          {sections
-            .filter(
-              (section) => section.type === (terrainType === '평면' ? 'p' : 's')
-            )
-            .map((section) => {
-              if (section.type === 'p') {
-                return (
-                  <div key={section.name}>
-                    <p>
-                      구간 P {section.sectionText || ''} 수정층후 합계:{' '}
-                      {getSectionThicknessTotal(section).toFixed(2)}m
-                    </p>
-                    <p
-                      className={
-                        Math.abs(
-                          getSectionThicknessTotal(section) - excavationDepth
-                        ) < 0.01
-                          ? 'text-green-600'
-                          : 'text-red-600'
-                      }
-                    >
-                      검증:{' '}
-                      {Math.abs(
-                        getSectionThicknessTotal(section) - excavationDepth
-                      ) < 0.01
-                        ? 'TRUE'
-                        : 'FALSE'}
-                    </p>
-                  </div>
-                );
-              } else {
-                // S 구간은 1~4행과 1~5행 두 가지 검증
-                const firstFourRowsTotal = section.rows
-                  .slice(0, 4)
-                  .reduce((sum, row) => sum + Number(row.modifiedThickness), 0);
-                const allRowsTotal = getSectionThicknessTotal(section);
-                const excavation1 = originalGroundLevel + sExcavationLevel1;
-                const excavation2 = originalGroundLevel + sExcavationLevel2;
-
-                return (
-                  <div key={section.name}>
-                    <p>
-                      구간 S {section.sectionText || ''} 수정층후 1~4행 합계:{' '}
-                      {firstFourRowsTotal.toFixed(2)}m
-                    </p>
-                    <p
-                      className={
-                        Math.abs(firstFourRowsTotal - excavation1) < 0.01
-                          ? 'text-green-600'
-                          : 'text-red-600'
-                      }
-                    >
-                      1차 굴착 검증:{' '}
-                      {Math.abs(firstFourRowsTotal - excavation1) < 0.01
-                        ? 'TRUE'
-                        : 'FALSE'}
-                    </p>
-                    <p>
-                      구간 S {section.sectionText || ''} 수정층후 1~5행 합계:{' '}
-                      {allRowsTotal.toFixed(2)}m
-                    </p>
-                    <p
-                      className={
-                        Math.abs(allRowsTotal - excavation2) < 0.01
-                          ? 'text-green-600'
-                          : 'text-red-600'
-                      }
-                    >
-                      최종 굴착 검증:{' '}
-                      {Math.abs(allRowsTotal - excavation2) < 0.01
-                        ? 'TRUE'
-                        : 'FALSE'}
-                    </p>
-                  </div>
-                );
-              }
-            })}
+            {terrainType === '사면' && (
+              <>
+                <p className="font-medium">S 구간:</p>
+                <div className="ml-4 space-y-1">
+                  <p>1~4행: 1차 굴착길이 기준으로 계산</p>
+                  <p>5행: 최종 굴착길이 기준으로 계산 (추가 굴착분)</p>
+                </div>
+                <p className="mt-3 text-red-600 font-medium">
+                  S 구간: 1~4행 합계 = 1차 굴착길이, 1~5행 합계 = 최종 굴착길이
+                </p>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-
-      {/* 계산식 설명 */}
-      <div className="bg-green-100 p-4 rounded-lg text-xs space-y-2">
-        <h4 className="font-bold text-sm mb-2">수정층후 계산식</h4>
-        <div className="space-y-1">
-          {terrainType === '평면' && (
-            <>
-              <p className="font-medium">P 구간:</p>
-              <div className="ml-4 space-y-1">
-                <p>
-                  매립토: MIN(MAX(0, 굴착깊이-원지반고), MAX(0,
-                  매립토두께-원지반고))
-                </p>
-                <p>
-                  풍화암: MIN(풍화암두께, MAX(0,
-                  굴착깊이-원지반고-매립토계산값))
-                </p>
-                <p>
-                  연암: MIN(연암두께, MAX(0,
-                  굴착깊이-원지반고-매립토계산값-풍화암계산값))
-                </p>
-              </div>
-              <p className="mt-3 text-red-600 font-medium">
-                P 구간: 수정층후 합계 = 굴착깊이
-              </p>
-            </>
-          )}
-
-          {terrainType === '사면' && (
-            <>
-              <p className="font-medium">S 구간:</p>
-              <div className="ml-4 space-y-1">
-                <p>1~4행: 1차 굴착길이 기준으로 계산</p>
-                <p>5행: 최종 굴착길이 기준으로 계산 (추가 굴착분)</p>
-              </div>
-              <p className="mt-3 text-red-600 font-medium">
-                S 구간: 1~4행 합계 = 1차 굴착길이, 1~5행 합계 = 최종 굴착길이
-              </p>
-            </>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
