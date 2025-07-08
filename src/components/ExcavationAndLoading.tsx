@@ -457,17 +457,22 @@ export default function ExcavationAndLoading({
 
   // 구간 추가
   const addSection = () => {
+    const currentType = terrainType === '평면' ? 'p' : 's';
+    const existingSections = sections.filter((s) => s.type === currentType);
+    const newSectionNumber = existingSections.length + 1;
+
     const newSection: ExcavationSection = {
-      name: String(sections.length + 1),
-      type: 'p',
+      name: `${currentType}-${newSectionNumber}`,
+      type: currentType,
+      sectionText: currentType === 's' ? `1-${newSectionNumber + 1}` : '',
       rows: [
         {
-          id: `${sections.length + 1}-1`,
+          id: `${currentType}-${newSectionNumber}-1`,
           sectionNumber: '1',
           rockType: '매립토',
           workType: '직',
           item: '',
-          area: area,
+          area: currentType === 'p' ? area : sArea,
           modifiedThickness: 0,
           applicationRate: 100,
           volume: 0,
@@ -644,13 +649,14 @@ export default function ExcavationAndLoading({
                             {isFirstRow && (
                               <>
                                 <td
-                                  className="border border-gray-400 px-1 py-1 bg-yellow-200 text-center font-bold"
+                                  className="border border-gray-400 px-4 py-1 bg-yellow-200 text-center font-bold"
                                   rowSpan={section.rows.length}
+                                  style={{ minWidth: '60px' }}
                                 >
                                   {section.type.toUpperCase()}
                                 </td>
                                 <td
-                                  className="border border-gray-400 px-1 py-1 bg-yellow-100"
+                                  className="border border-gray-400 px-2 py-1 bg-yellow-100"
                                   rowSpan={section.rows.length}
                                 >
                                   <input
@@ -825,6 +831,39 @@ export default function ExcavationAndLoading({
                           {getSectionTotal(section)}
                         </td>
                       </tr>
+                      {/* 구간 추가/삭제 버튼 */}
+                      <tr>
+                        <td
+                          colSpan={8}
+                          className="border border-gray-400 px-2 py-2 text-center"
+                        >
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={addSection}
+                              className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                            >
+                              구간 추가
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (
+                                  sections.filter((s) => s.type === 'p')
+                                    .length > 1
+                                ) {
+                                  setSections(
+                                    sections.filter(
+                                      (s) => s.name !== section.name
+                                    )
+                                  );
+                                }
+                              }}
+                              className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                            >
+                              구간 삭제
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
                     </React.Fragment>
                   ))}
               </tbody>
@@ -972,13 +1011,14 @@ export default function ExcavationAndLoading({
                             {isFirstRow && (
                               <>
                                 <td
-                                  className="border border-gray-400 px-1 py-1 bg-yellow-200 text-center font-bold"
+                                  className="border border-gray-400 px-4 py-1 bg-yellow-200 text-center font-bold"
                                   rowSpan={section.rows.length}
+                                  style={{ minWidth: '60px' }}
                                 >
                                   {section.type.toUpperCase()}
                                 </td>
                                 <td
-                                  className="border border-gray-400 px-1 py-1 bg-yellow-100"
+                                  className="border border-gray-400 px-2 py-1 bg-yellow-100"
                                   rowSpan={section.rows.length}
                                 >
                                   <input
@@ -1153,6 +1193,39 @@ export default function ExcavationAndLoading({
                           {getSectionTotal(section)}
                         </td>
                       </tr>
+                      {/* 구간 추가/삭제 버튼 */}
+                      <tr>
+                        <td
+                          colSpan={8}
+                          className="border border-gray-400 px-2 py-2 text-center"
+                        >
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={addSection}
+                              className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                            >
+                              구간 추가
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (
+                                  sections.filter((s) => s.type === 's')
+                                    .length > 1
+                                ) {
+                                  setSections(
+                                    sections.filter(
+                                      (s) => s.name !== section.name
+                                    )
+                                  );
+                                }
+                              }}
+                              className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                            >
+                              구간 삭제
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
                     </React.Fragment>
                   ))}
               </tbody>
@@ -1200,16 +1273,6 @@ export default function ExcavationAndLoading({
             </tr>
           </tbody>
         </table>
-      </div>
-
-      {/* 구간 추가 버튼 */}
-      <div className="flex justify-end">
-        <button
-          onClick={addSection}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          구간 추가
-        </button>
       </div>
 
       {/* 굴착깊이 검증 정보 */}
