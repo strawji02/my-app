@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   GroundLevelData,
   GeologicalData,
@@ -7,6 +7,7 @@ import {
 } from '@/types/earthwork';
 import ExcavationCalculator from '@/components/ExcavationCalculator';
 import ExcavationAndLoading from '@/components/ExcavationAndLoading';
+import useEarthworkStore from '@/store/earthworkStore';
 
 interface DataDisplayProps {
   groundLevelData: GroundLevelData;
@@ -20,6 +21,7 @@ export default function DataDisplay({
   calculationType,
 }: DataDisplayProps) {
   const [excavationData, setExcavationData] = useState<ExcavationData[]>([]);
+  const { setCalculationResults } = useEarthworkStore();
 
   // 굴착 계산 업데이트 핸들러
   const handleExcavationUpdate = (data: ExcavationData[]) => {
@@ -147,9 +149,21 @@ export default function DataDisplay({
     };
   };
 
-  const geologicalResults = calculateGeological();
-  const columnAverages = calculateColumnAverages(geologicalResults);
-  const modifiedThickness = calculateModifiedThickness(columnAverages);
+  const geologicalResults = useMemo(
+    () => calculateGeological(),
+    [geologicalData.rawData, calculationType]
+  );
+
+  const columnAverages = useMemo(
+    () => calculateColumnAverages(geologicalResults),
+    [geologicalResults]
+  );
+
+  const modifiedThickness = useMemo(
+    () => calculateModifiedThickness(columnAverages),
+    [columnAverages, groundLevelData.average]
+  );
+
   const activeColumns =
     calculationType === 'TYPE1' ? TYPE1_COLUMNS : TYPE2_COLUMNS;
 
@@ -157,6 +171,35 @@ export default function DataDisplay({
   const groundLevelGrid = groundLevelData.rawData.map((row) =>
     Object.values(row).map((value) => value as string | number)
   );
+
+  // 계산 결과를 store에 저장 - 실제 데이터가 변경될 때만 실행
+  useEffect(() => {
+    // columnAverages가 비어있으면 실행하지 않음
+    if (Object.keys(columnAverages).length === 0) return;
+
+    // 평균층후 데이터를 store 형식에 맞게 변환
+    const averageThickness = {
+      매립토:
+        calculationType === 'TYPE1'
+          ? (columnAverages['매립층'] || 0) + (columnAverages['풍화토'] || 0)
+          : columnAverages['토사'] || 0,
+      풍화토: calculationType === 'TYPE1' ? columnAverages['풍화토'] || 0 : 0,
+      풍화암: columnAverages['풍화암'] || 0,
+      연암: columnAverages['연암'] || 0,
+      경암: 0, // 경암은 현재 데이터에 없으므로 0으로 설정
+    };
+
+    setCalculationResults({
+      averageThickness,
+      modifiedThickness: modifiedThickness,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    groundLevelData.average,
+    geologicalData.rawData.length,
+    calculationType,
+    setCalculationResults,
+  ]);
 
   return (
     <div className="space-y-8">

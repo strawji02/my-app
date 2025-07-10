@@ -45,6 +45,9 @@ export default function ExcavationAndLoading({
   // 지형 선택 상태 추가
   const [terrainType, setTerrainType] = useState<'평면' | '사면' | ''>('');
 
+  // 구간명 입력 상태 추가
+  const [sectionName, setSectionName] = useState<string>('1');
+
   // 입력 완료 상태 추가
   const [isInputComplete, setIsInputComplete] = useState(false);
 
@@ -87,7 +90,7 @@ export default function ExcavationAndLoading({
     {
       name: 'p',
       type: 'p',
-      sectionText: '',
+      sectionText: '1',
       rows: [
         {
           id: 'p-1',
@@ -138,7 +141,7 @@ export default function ExcavationAndLoading({
     {
       name: 's',
       type: 's',
-      sectionText: '1-2',
+      sectionText: '1',
       subSections: ['1-2'],
       rows: [
         {
@@ -199,6 +202,21 @@ export default function ExcavationAndLoading({
       ],
     },
   ]);
+
+  // 구간명 변경시 첫 번째 구간 업데이트
+  useEffect(() => {
+    if (terrainType && sectionName) {
+      const currentType = terrainType === '평면' ? 'p' : 's';
+      const newSections = sections.map((section) => {
+        // 현재 지형 타입의 첫 번째 구간만 업데이트
+        if (section.type === currentType && section.name === currentType) {
+          return { ...section, sectionText: sectionName };
+        }
+        return section;
+      });
+      setSections(newSections);
+    }
+  }, [sectionName, terrainType]);
 
   // 수정층후 업데이트
   useEffect(() => {
@@ -459,22 +477,56 @@ export default function ExcavationAndLoading({
   };
 
   // 구간 추가
-  const addSection = () => {
+  const handleAddSection = () => {
     const currentType = terrainType === '평면' ? 'p' : 's';
     const existingSections = sections.filter((s) => s.type === currentType);
     const newSectionNumber = existingSections.length + 1;
 
+    // 새로운 구간 추가
     const newSection: ExcavationSection = {
       name: `${currentType}-${newSectionNumber}`,
       type: currentType,
-      sectionText: currentType === 's' ? `1-${newSectionNumber + 1}` : '',
+      sectionText: `${newSectionNumber}`,
       rows: [
         {
           id: `${currentType}-${newSectionNumber}-1`,
           sectionNumber: '1',
           rockType: '매립토',
           workType: '직',
-          item: '',
+          item: '일반',
+          area: currentType === 'p' ? area : sArea,
+          modifiedThickness: 5.0,
+          applicationRate: 100,
+          volume: 0,
+        },
+        {
+          id: `${currentType}-${newSectionNumber}-2`,
+          sectionNumber: '2',
+          rockType: '매립토',
+          workType: '크',
+          item: '일반',
+          area: currentType === 'p' ? area : sArea,
+          modifiedThickness: 0,
+          applicationRate: 100,
+          volume: 0,
+        },
+        {
+          id: `${currentType}-${newSectionNumber}-3`,
+          sectionNumber: '3',
+          rockType: '풍화암',
+          workType: '크',
+          item: '일반',
+          area: currentType === 'p' ? area : sArea,
+          modifiedThickness: 0,
+          applicationRate: 100,
+          volume: 0,
+        },
+        {
+          id: `${currentType}-${newSectionNumber}-4`,
+          sectionNumber: '4',
+          rockType: '연암',
+          workType: '크',
+          item: '마사토',
           area: currentType === 'p' ? area : sArea,
           modifiedThickness: 0,
           applicationRate: 100,
@@ -482,6 +534,22 @@ export default function ExcavationAndLoading({
         },
       ],
     };
+
+    // S 구간의 경우 5번째 행 추가
+    if (currentType === 's') {
+      newSection.rows.push({
+        id: `${currentType}-${newSectionNumber}-5`,
+        sectionNumber: '5',
+        rockType: '연암',
+        workType: '크',
+        item: '일반',
+        area: sArea,
+        modifiedThickness: 0,
+        applicationRate: 50,
+        volume: 0,
+      });
+    }
+
     setSections([...sections, newSection]);
   };
 
@@ -540,7 +608,21 @@ export default function ExcavationAndLoading({
         <div>
           {/* P 구간 입력 폼 */}
           <div className="bg-blue-50 p-4 rounded-lg space-y-4">
-            <h3 className="font-bold text-sm mb-2">4-2. P 구간 입력</h3>
+            <h3 className="font-bold text-sm mb-2">4-2. 구간명 입력</h3>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                구간명 (숫자 또는 텍스트)
+              </label>
+              <input
+                type="text"
+                value={sectionName}
+                onChange={(e) => setSectionName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="예: 1, A, 구간1 등"
+              />
+            </div>
+
+            <h3 className="font-bold text-sm mb-2 mt-4">4-3. P 구간 입력</h3>
             <div className="grid grid-cols-2 gap-4">
               {/* 면적 입력 */}
               <div>
@@ -609,9 +691,7 @@ export default function ExcavationAndLoading({
           {/* P 구간 테이블 - 입력 완료시에만 표시 */}
           {isInputComplete && (
             <>
-              <h3 className="font-bold text-sm mt-4 mb-2">
-                4-3. 구간 P 테이블
-              </h3>
+              <h3 className="font-bold text-sm mt-4 mb-2">4.4. 구간별 산출</h3>
               <div className="overflow-x-auto mt-4">
                 <table className="min-w-full border-collapse text-xs">
                   <thead>
@@ -860,42 +940,28 @@ export default function ExcavationAndLoading({
                               colSpan={7}
                               className="border border-gray-400 px-2 py-1 text-right"
                             >
-                              구간 P {section.sectionText || ''} 소계:
+                              구간 P-{section.sectionText || ''} 소계:
                             </td>
-                            <td className="border border-gray-400 px-2 py-1 text-center font-bold">
-                              {getSectionTotal(section)}
-                            </td>
-                          </tr>
-                          {/* 구간 추가/삭제 버튼 */}
-                          <tr>
-                            <td
-                              colSpan={8}
-                              className="border border-gray-400 px-2 py-2 text-center"
-                            >
-                              <div className="flex justify-center gap-2">
-                                <button
-                                  onClick={addSection}
-                                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
-                                >
-                                  구간 추가
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (
-                                      sections.filter((s) => s.type === 'p')
-                                        .length > 1
-                                    ) {
+                            <td className="border border-gray-400 px-2 py-1 text-center font-bold relative">
+                              <div className="flex items-center justify-between">
+                                <span className="flex-1 text-center">
+                                  {getSectionTotal(section)}
+                                </span>
+                                {sections.filter((s) => s.type === 'p').length >
+                                  1 && (
+                                  <button
+                                    onClick={() => {
                                       setSections(
                                         sections.filter(
                                           (s) => s.name !== section.name
                                         )
                                       );
-                                    }
-                                  }}
-                                  className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
-                                >
-                                  구간 삭제
-                                </button>
+                                    }}
+                                    className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                                  >
+                                    삭제
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -903,6 +969,15 @@ export default function ExcavationAndLoading({
                       ))}
                   </tbody>
                 </table>
+                {/* 구간 추가 버튼 */}
+                <div className="mt-2 flex justify-start">
+                  <button
+                    onClick={handleAddSection}
+                    className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                  >
+                    구간 추가
+                  </button>
+                </div>
               </div>
             </>
           )}
@@ -914,7 +989,21 @@ export default function ExcavationAndLoading({
         <div>
           {/* S 구간 입력 폼 */}
           <div className="bg-green-50 p-4 rounded-lg space-y-4">
-            <h3 className="font-bold text-sm mb-2">4-2. S 구간 (1-2) 입력</h3>
+            <h3 className="font-bold text-sm mb-2">4-2. 구간명 입력</h3>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                구간명 (숫자 또는 텍스트)
+              </label>
+              <input
+                type="text"
+                value={sectionName}
+                onChange={(e) => setSectionName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="예: 1, A, 구간1 등"
+              />
+            </div>
+
+            <h3 className="font-bold text-sm mb-2 mt-4">4-3. S 구간 입력</h3>
             <div className="grid grid-cols-2 gap-4">
               {/* 면적 입력 */}
               <div>
@@ -1003,9 +1092,7 @@ export default function ExcavationAndLoading({
           {/* S 구간 테이블 - 입력 완료시에만 표시 */}
           {isInputComplete && (
             <>
-              <h3 className="font-bold text-sm mt-4 mb-2">
-                4-3. 구간 S 테이블
-              </h3>
+              <h3 className="font-bold text-sm mt-4 mb-2">4.4. 구간별 산출</h3>
               <div className="overflow-x-auto mt-4">
                 <table className="min-w-full border-collapse text-xs">
                   <thead>
@@ -1254,42 +1341,28 @@ export default function ExcavationAndLoading({
                               colSpan={7}
                               className="border border-gray-400 px-2 py-1 text-right"
                             >
-                              구간 S {section.sectionText || ''} 소계:
+                              구간 S-{section.sectionText || ''} 소계:
                             </td>
-                            <td className="border border-gray-400 px-2 py-1 text-center font-bold">
-                              {getSectionTotal(section)}
-                            </td>
-                          </tr>
-                          {/* 구간 추가/삭제 버튼 */}
-                          <tr>
-                            <td
-                              colSpan={8}
-                              className="border border-gray-400 px-2 py-2 text-center"
-                            >
-                              <div className="flex justify-center gap-2">
-                                <button
-                                  onClick={addSection}
-                                  className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
-                                >
-                                  구간 추가
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (
-                                      sections.filter((s) => s.type === 's')
-                                        .length > 1
-                                    ) {
+                            <td className="border border-gray-400 px-2 py-1 text-center font-bold relative">
+                              <div className="flex items-center justify-between">
+                                <span className="flex-1 text-center">
+                                  {getSectionTotal(section)}
+                                </span>
+                                {sections.filter((s) => s.type === 's').length >
+                                  1 && (
+                                  <button
+                                    onClick={() => {
                                       setSections(
                                         sections.filter(
                                           (s) => s.name !== section.name
                                         )
                                       );
-                                    }
-                                  }}
-                                  className="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
-                                >
-                                  구간 삭제
-                                </button>
+                                    }}
+                                    className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                                  >
+                                    삭제
+                                  </button>
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -1297,6 +1370,15 @@ export default function ExcavationAndLoading({
                       ))}
                   </tbody>
                 </table>
+                {/* 구간 추가 버튼 */}
+                <div className="mt-2 flex justify-start">
+                  <button
+                    onClick={handleAddSection}
+                    className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                  >
+                    구간 추가
+                  </button>
+                </div>
               </div>
             </>
           )}
@@ -1343,6 +1425,15 @@ export default function ExcavationAndLoading({
               </tr>
             </tbody>
           </table>
+          {/* 전체 테이블 하단 구간 추가 버튼 */}
+          <div className="mt-2 flex justify-start">
+            <button
+              onClick={handleAddSection}
+              className="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+            >
+              구간 추가
+            </button>
+          </div>
         </div>
       )}
 
@@ -1376,7 +1467,7 @@ export default function ExcavationAndLoading({
                   return (
                     <div key={section.name}>
                       <p>
-                        구간 P {section.sectionText || ''} 수정층후 합계:{' '}
+                        구간 P-{section.sectionText || ''} 수정층후 합계:{' '}
                         {getSectionThicknessTotal(section).toFixed(2)}m
                       </p>
                       <p
@@ -1412,7 +1503,7 @@ export default function ExcavationAndLoading({
                   return (
                     <div key={section.name}>
                       <p>
-                        구간 S {section.sectionText || ''} 수정층후 1~4행 합계:{' '}
+                        구간 S-{section.sectionText || ''} 수정층후 1~4행 합계:{' '}
                         {firstFourRowsTotal.toFixed(2)}m
                       </p>
                       <p
@@ -1428,7 +1519,7 @@ export default function ExcavationAndLoading({
                           : 'FALSE'}
                       </p>
                       <p>
-                        구간 S {section.sectionText || ''} 수정층후 1~5행 합계:{' '}
+                        구간 S-{section.sectionText || ''} 수정층후 1~5행 합계:{' '}
                         {allRowsTotal.toFixed(2)}m
                       </p>
                       <p
