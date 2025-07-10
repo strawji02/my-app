@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ProgressBar from '@/components/common/ProgressBar';
-import DataDisplay from '@/components/DataDisplay';
+import DataReview from '@/components/data-review/DataReview';
 import useEarthworkStore from '@/store/earthworkStore';
 
 export default function DataReviewPage() {
@@ -46,7 +46,7 @@ export default function DataReviewPage() {
         <h1 className="text-3xl font-bold text-center mb-8">데이터 검토</h1>
 
         <div className="max-w-7xl mx-auto">
-          <DataDisplay
+          <DataReview
             groundLevelData={groundLevelData}
             geologicalData={geologicalData}
             calculationType={calculationType}

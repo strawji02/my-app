@@ -465,7 +465,13 @@ export default function DataDisplay({
       {/* 터파기 및 상차 */}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h3 className="text-xl font-bold mb-4">터파기 및 상차</h3>
-        <ExcavationAndLoading modifiedThickness={modifiedThickness} />
+        <ExcavationAndLoading
+          rockThickness={{
+            매립토: modifiedThickness.modified.landfill,
+            풍화암: modifiedThickness.modified.weatheredRock,
+            연암: modifiedThickness.modified.softRock,
+          }}
+        />
       </div>
 
       {/* 평균지반고 원본 데이터 */}

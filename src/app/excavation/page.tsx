@@ -1,13 +1,17 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProgressBar from '@/components/common/ProgressBar';
 import ExcavationAndLoading from '@/components/ExcavationAndLoading';
+import ExcavationCalculator from '@/components/ExcavationCalculator';
+import { ExcavationData } from '@/types/earthwork';
 import useEarthworkStore from '@/store/earthworkStore';
 
 export default function ExcavationPage() {
   const router = useRouter();
+  const [excavationData, setExcavationData] = useState<ExcavationData[]>([]);
+
   const {
     groundLevelData,
     geologicalData,
@@ -35,6 +39,10 @@ export default function ExcavationPage() {
     router.push('/data-review');
   };
 
+  const handleExcavationUpdate = (data: ExcavationData[]) => {
+    setExcavationData(data);
+  };
+
   if (!groundLevelData || !geologicalData) {
     return null;
   }
@@ -48,12 +56,62 @@ export default function ExcavationPage() {
           터파기 및 상차 계산
         </h1>
 
-        <div className="max-w-7xl mx-auto">
-          <ExcavationAndLoading
-            modifiedThickness={
-              calculationResults?.modifiedThickness || undefined
-            }
-          />
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* 줄파기 - 토공량 계산 */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-bold mb-4">줄파기</h3>
+            <ExcavationCalculator
+              onCalculationUpdate={handleExcavationUpdate}
+            />
+
+            {/* 토공 관련 참고 정보 */}
+            {excavationData.length > 0 && (
+              <div className="mt-6 bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">토공 견적 참고</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="font-medium mb-1">단위중량 적용</p>
+                    <ul className="space-y-1 text-gray-700">
+                      <li>• 토사: 1.8 ~ 2.0 ton/m³</li>
+                      <li>• 풍화암: 2.2 ~ 2.4 ton/m³</li>
+                      <li>• 연암: 2.5 ~ 2.6 ton/m³</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="font-medium mb-1">할증률</p>
+                    <ul className="space-y-1 text-gray-700">
+                      <li>• 토사 굴착: 1.2 ~ 1.3</li>
+                      <li>• 암반 굴착: 1.3 ~ 1.5</li>
+                      <li>• 운반거리별 추가 할증 적용</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 터파기 및 상차 */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <ExcavationAndLoading
+              rockThickness={
+                calculationResults?.modifiedThickness
+                  ? {
+                      매립토:
+                        calculationResults.modifiedThickness.modified.landfill,
+                      풍화암:
+                        calculationResults.modifiedThickness.modified
+                          .weatheredRock,
+                      연암: calculationResults.modifiedThickness.modified
+                        .softRock,
+                    }
+                  : {
+                      매립토: 21.475,
+                      풍화암: 0.75,
+                      연암: 7.8,
+                    }
+              }
+            />
+          </div>
 
           <div className="mt-8 flex justify-center gap-4">
             <button
