@@ -17,48 +17,53 @@ interface SectionTableProps {
       applicationRate: number;
       volume: number;
     }>;
-    excavationLevel2?: number;
-    subSections?: string[];
+    terrainType: '평면' | '사면' | '';
+    sectionName: string;
+    isInputComplete: boolean;
+    area: number;
+    originalGroundLevel: number;
+    excavationLevel: number;
+    sExcavationLevel1?: number;
+    sExcavationLevel2?: number;
   };
 }
 
 export default function SectionTable({ section }: SectionTableProps) {
-  const {
-    terrainType,
-    sectionName,
-    updateRow,
-    updateSectionText,
-    deleteSection,
-    originalGroundLevel,
-    excavationLevel,
-    sExcavationLevel1,
-    sExcavationLevel2,
-    rockThickness,
-  } = useExcavationStore();
+  const { updateRow, updateSectionText, deleteSection, rockThickness } =
+    useExcavationStore();
 
   // 이전 값들을 추적하여 실제 변경이 있을 때만 업데이트
   const prevDepsRef = useRef({
     rockThickness,
-    originalGroundLevel,
-    excavationLevel,
-    sExcavationLevel1,
-    sExcavationLevel2,
+    originalGroundLevel: section.originalGroundLevel,
+    excavationLevel: section.excavationLevel,
+    sExcavationLevel1: section.sExcavationLevel1,
+    sExcavationLevel2: section.sExcavationLevel2,
   });
 
   const currentExcavationDepth = useMemo(() => {
-    if (terrainType === '평면') {
-      return originalGroundLevel + excavationLevel;
+    if (section.terrainType === '평면') {
+      return section.originalGroundLevel + section.excavationLevel;
     } else {
-      return originalGroundLevel + sExcavationLevel1;
+      return section.originalGroundLevel + (section.sExcavationLevel1 || 0);
     }
-  }, [terrainType, originalGroundLevel, excavationLevel, sExcavationLevel1]);
+  }, [
+    section.terrainType,
+    section.originalGroundLevel,
+    section.excavationLevel,
+    section.sExcavationLevel1,
+  ]);
 
   const secondExcavationDepth = useMemo(() => {
-    if (terrainType === '사면') {
-      return originalGroundLevel + sExcavationLevel2;
+    if (section.terrainType === '사면') {
+      return section.originalGroundLevel + (section.sExcavationLevel2 || 0);
     }
     return 0;
-  }, [terrainType, originalGroundLevel, sExcavationLevel2]);
+  }, [
+    section.terrainType,
+    section.originalGroundLevel,
+    section.sExcavationLevel2,
+  ]);
 
   // 수정층후 자동 계산
   useEffect(() => {
@@ -67,10 +72,10 @@ export default function SectionTable({ section }: SectionTableProps) {
     // 이전 값과 비교하여 실제로 변경되었는지 확인
     const deps = {
       rockThickness,
-      originalGroundLevel,
-      excavationLevel,
-      sExcavationLevel1,
-      sExcavationLevel2,
+      originalGroundLevel: section.originalGroundLevel,
+      excavationLevel: section.excavationLevel,
+      sExcavationLevel1: section.sExcavationLevel1,
+      sExcavationLevel2: section.sExcavationLevel2,
     };
 
     const hasChanged =
@@ -192,10 +197,10 @@ export default function SectionTable({ section }: SectionTableProps) {
     secondExcavationDepth,
     section.name,
     section.type,
-    originalGroundLevel,
-    excavationLevel,
-    sExcavationLevel1,
-    sExcavationLevel2,
+    section.originalGroundLevel,
+    section.excavationLevel,
+    section.sExcavationLevel1,
+    section.sExcavationLevel2,
   ]);
 
   const subtotal = useMemo(() => {
@@ -203,8 +208,8 @@ export default function SectionTable({ section }: SectionTableProps) {
   }, [section.rows]);
 
   const sectionTitle = useMemo(() => {
-    const displayName = section.sectionText || sectionName;
-    if (terrainType === '평면') {
+    const displayName = section.sectionText || section.sectionName;
+    if (section.terrainType === '평면') {
       return `4.${
         3 + parseInt(section.name.split('-')[1] || '1')
       }. P-${displayName}`;
@@ -213,7 +218,12 @@ export default function SectionTable({ section }: SectionTableProps) {
         3 + parseInt(section.name.split('-')[1] || '1')
       }. S-${displayName}`;
     }
-  }, [terrainType, section.name, section.sectionText, sectionName]);
+  }, [
+    section.terrainType,
+    section.name,
+    section.sectionText,
+    section.sectionName,
+  ]);
 
   return (
     <div className="mb-6">

@@ -2,14 +2,10 @@
 
 import { useEffect } from 'react';
 import useExcavationStore from '@/store/excavationStore';
-import TerrainSelector from './excavation/TerrainSelector';
-import SectionNameInput from './excavation/SectionNameInput';
-import PlaneSectionInput from './excavation/PlaneSectionInput';
-import SlopeSectionInput from './excavation/SlopeSectionInput';
-import SectionTable from './excavation/SectionTable';
+import SectionForm from './excavation/SectionForm';
+import SummaryTable from './excavation/SummaryTable';
 import ValidationInfo from './excavation/ValidationInfo';
 import CalculationGuide from './excavation/CalculationGuide';
-import SummaryTable from './excavation/SummaryTable';
 
 interface ExcavationAndLoadingProps {
   rockThickness: {
@@ -22,98 +18,68 @@ interface ExcavationAndLoadingProps {
 export default function ExcavationAndLoading({
   rockThickness,
 }: ExcavationAndLoadingProps) {
-  const {
-    terrainType,
-    sections,
-    isInputComplete,
-    setIsInputComplete,
-    setRockThickness,
-    addSection,
-  } = useExcavationStore();
+  const { sections, setRockThickness, addSection } = useExcavationStore();
 
   // rockThickness props를 store에 저장
   useEffect(() => {
     setRockThickness(rockThickness);
   }, [rockThickness, setRockThickness]);
 
-  // 필터링된 섹션들 (현재 선택된 지형에 맞는 섹션만 표시)
-  const filteredSections = sections.filter((section) => {
-    if (terrainType === '평면') {
-      return section.type === 'p';
-    } else if (terrainType === '사면') {
-      return section.type === 's';
+  // 첫 번째 구간이 없으면 자동으로 추가
+  useEffect(() => {
+    if (sections.length === 0) {
+      addSection();
     }
-    return false;
-  });
+  }, [sections.length, addSection]);
+
+  // 모든 구간이 입력 완료되었는지 확인
+  const allSectionsComplete = sections.every(
+    (section) => section.isInputComplete && section.rows.length > 0
+  );
+
+  // 전체 부피 합계 계산
+  const totalVolume = sections.reduce(
+    (total, section) =>
+      total + section.rows.reduce((acc, row) => acc + row.volume, 0),
+    0
+  );
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-xl font-bold mb-6">4. 터파기 및 상차</h2>
 
-      {/* 지형 선택 */}
-      <TerrainSelector />
+      {/* 각 구간 폼 */}
+      {sections.map((section, index) => (
+        <SectionForm
+          key={section.name}
+          section={section}
+          sectionIndex={index}
+        />
+      ))}
 
-      {/* 구간명 입력 */}
-      {terrainType && (
-        <div className="mt-4">
-          <SectionNameInput />
-        </div>
-      )}
+      {/* 구간 추가 버튼 */}
+      <div className="text-center mb-6">
+        <button
+          onClick={addSection}
+          className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium"
+        >
+          + 새 구간 추가
+        </button>
+      </div>
 
-      {/* P구간 또는 S구간 입력 */}
-      {terrainType === '평면' && <PlaneSectionInput />}
-      {terrainType === '사면' && <SlopeSectionInput />}
+      {/* 전체 결과 섹션 - 모든 구간이 완료되었을 때만 표시 */}
+      {allSectionsComplete && sections.length > 0 && (
+        <div className="border-t-2 border-gray-300 pt-6 mt-6">
+          <h3 className="font-bold text-lg mb-4">전체 산출 결과</h3>
 
-      {/* 입력 완료 버튼 */}
-      {terrainType && (
-        <div className="mt-4">
-          <button
-            onClick={() => setIsInputComplete(true)}
-            className={`px-4 py-2 rounded ${
-              isInputComplete
-                ? 'bg-green-500 text-white'
-                : 'bg-blue-500 text-white hover:bg-blue-600'
-            }`}
-          >
-            {isInputComplete ? '✓ 입력 완료' : '입력 완료'}
-          </button>
-        </div>
-      )}
-
-      {/* 구간별 산출 */}
-      {isInputComplete && (
-        <div className="mt-6">
-          <h3 className="font-bold text-lg mb-4">4.4. 구간별 산출</h3>
-
-          {/* 각 구간 테이블 */}
-          {filteredSections.map((section) => (
-            <SectionTable key={section.name} section={section} />
-          ))}
-
-          {/* 구간 추가 버튼 */}
-          <button
-            onClick={addSection}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            + 구간 추가
-          </button>
-
-          {/* 합계표 추가 */}
+          {/* 합계표 */}
           <SummaryTable />
 
           {/* 전체 합계 */}
           <div className="mt-6 p-4 bg-gray-100 rounded">
-            <h4 className="font-bold">전체 합계</h4>
+            <h4 className="font-bold">전체 부피 합계</h4>
             <p className="text-lg font-bold text-blue-600 mt-2">
-              {filteredSections
-                .reduce(
-                  (total, section) =>
-                    total +
-                    section.rows.reduce((acc, row) => acc + row.volume, 0),
-                  0
-                )
-                .toLocaleString()}{' '}
-              m³
+              {totalVolume.toLocaleString()} m³
             </p>
           </div>
 
