@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useExcavationStore from '@/store/excavationStore';
 import SectionTable from './SectionTable';
 
@@ -35,6 +35,39 @@ export default function SectionForm({
   sectionIndex,
 }: SectionFormProps) {
   const { updateSection, deleteSection } = useExcavationStore();
+
+  // 임시 입력값 상태
+  const [tempSectionName, setTempSectionName] = useState(section.sectionName || '');
+  const [tempArea, setTempArea] = useState(section.area || 0);
+  const [tempOriginalGroundLevel, setTempOriginalGroundLevel] = useState(
+    section.originalGroundLevel || 0
+  );
+  const [tempExcavationLevel, setTempExcavationLevel] = useState(
+    section.excavationLevel || 0
+  );
+  const [tempSExcavationLevel1, setTempSExcavationLevel1] = useState(
+    section.sExcavationLevel1 || 0
+  );
+  const [tempSExcavationLevel2, setTempSExcavationLevel2] = useState(
+    section.sExcavationLevel2 || 0
+  );
+
+  // section이 변경될 때 임시 상태 업데이트
+  useEffect(() => {
+    setTempSectionName(section.sectionName || '');
+    setTempArea(section.area || 0);
+    setTempOriginalGroundLevel(section.originalGroundLevel || 0);
+    setTempExcavationLevel(section.excavationLevel || 0);
+    setTempSExcavationLevel1(section.sExcavationLevel1 || 0);
+    setTempSExcavationLevel2(section.sExcavationLevel2 || 0);
+  }, [
+    section.sectionName,
+    section.area,
+    section.originalGroundLevel,
+    section.excavationLevel,
+    section.sExcavationLevel1,
+    section.sExcavationLevel2,
+  ]);
 
   // 지형이 선택되면 rows를 생성
   useEffect(() => {
@@ -118,12 +151,35 @@ export default function SectionForm({
     updateSection,
   ]);
 
-  // 굴착길이 계산
-  const excavationDepth = section.originalGroundLevel + section.excavationLevel;
-  const excavationDepth1 =
-    section.originalGroundLevel + (section.sExcavationLevel1 || 0);
-  const excavationDepth2 =
-    section.originalGroundLevel + (section.sExcavationLevel2 || 0);
+  // 굴착길이 계산 (임시 값 사용)
+  const excavationDepth = tempOriginalGroundLevel + tempExcavationLevel;
+  const excavationDepth1 = tempOriginalGroundLevel + tempSExcavationLevel1;
+  const excavationDepth2 = tempOriginalGroundLevel + tempSExcavationLevel2;
+
+  // 입력 완료 핸들러
+  const handleInputComplete = () => {
+    console.log('입력 완료 버튼 클릭됨');
+    console.log('현재 임시 값들:', {
+      tempSectionName,
+      tempArea,
+      tempOriginalGroundLevel,
+      tempExcavationLevel,
+      tempSExcavationLevel1,
+      tempSExcavationLevel2,
+    });
+    
+    // 모든 임시 값을 store에 저장
+    updateSection(section.name, {
+      sectionName: tempSectionName,
+      sectionText: tempSectionName,
+      area: tempArea,
+      originalGroundLevel: tempOriginalGroundLevel,
+      excavationLevel: tempExcavationLevel,
+      sExcavationLevel1: tempSExcavationLevel1,
+      sExcavationLevel2: tempSExcavationLevel2,
+      isInputComplete: true,
+    });
+  };
 
   return (
     <div className="border-2 border-gray-300 rounded-lg p-6 mb-6 bg-gray-50">
@@ -185,13 +241,8 @@ export default function SectionForm({
             <h4 className="font-bold text-sm mb-2">4-2. 구간명 입력</h4>
             <input
               type="text"
-              value={section.sectionName}
-              onChange={(e) =>
-                updateSection(section.name, {
-                  sectionName: e.target.value,
-                  sectionText: e.target.value,
-                })
-              }
+              value={tempSectionName}
+              onChange={(e) => setTempSectionName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
               placeholder="예: 1, A, 구간1 등"
             />
@@ -208,12 +259,8 @@ export default function SectionForm({
                   </label>
                   <input
                     type="number"
-                    value={section.area}
-                    onChange={(e) =>
-                      updateSection(section.name, {
-                        area: Number(e.target.value),
-                      })
-                    }
+                    value={tempArea}
+                    onChange={(e) => setTempArea(Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     step="0.01"
                   />
@@ -228,11 +275,9 @@ export default function SectionForm({
                       <span className="text-sm">EL</span>
                       <input
                         type="number"
-                        value={section.originalGroundLevel}
+                        value={tempOriginalGroundLevel}
                         onChange={(e) =>
-                          updateSection(section.name, {
-                            originalGroundLevel: Number(e.target.value),
-                          })
+                          setTempOriginalGroundLevel(Number(e.target.value))
                         }
                         className="w-24 px-2 py-1 border border-gray-300 rounded"
                         step="0.01"
@@ -243,11 +288,9 @@ export default function SectionForm({
                       <span className="text-sm">-EL</span>
                       <input
                         type="number"
-                        value={section.excavationLevel}
+                        value={tempExcavationLevel}
                         onChange={(e) =>
-                          updateSection(section.name, {
-                            excavationLevel: Number(e.target.value),
-                          })
+                          setTempExcavationLevel(Number(e.target.value))
                         }
                         className="w-24 px-2 py-1 border border-gray-300 rounded"
                         step="0.01"
@@ -273,12 +316,8 @@ export default function SectionForm({
                   </label>
                   <input
                     type="number"
-                    value={section.area}
-                    onChange={(e) =>
-                      updateSection(section.name, {
-                        area: Number(e.target.value),
-                      })
-                    }
+                    value={tempArea}
+                    onChange={(e) => setTempArea(Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     step="0.01"
                   />
@@ -293,11 +332,9 @@ export default function SectionForm({
                       <span className="text-sm">EL</span>
                       <input
                         type="number"
-                        value={section.originalGroundLevel}
+                        value={tempOriginalGroundLevel}
                         onChange={(e) =>
-                          updateSection(section.name, {
-                            originalGroundLevel: Number(e.target.value),
-                          })
+                          setTempOriginalGroundLevel(Number(e.target.value))
                         }
                         className="w-24 px-2 py-1 border border-gray-300 rounded"
                         step="0.01"
@@ -308,11 +345,9 @@ export default function SectionForm({
                       <span className="text-sm">-EL</span>
                       <input
                         type="number"
-                        value={section.sExcavationLevel1}
+                        value={tempSExcavationLevel1}
                         onChange={(e) =>
-                          updateSection(section.name, {
-                            sExcavationLevel1: Number(e.target.value),
-                          })
+                          setTempSExcavationLevel1(Number(e.target.value))
                         }
                         className="w-24 px-2 py-1 border border-gray-300 rounded"
                         step="0.01"
@@ -323,11 +358,9 @@ export default function SectionForm({
                       <span className="text-sm">-EL</span>
                       <input
                         type="number"
-                        value={section.sExcavationLevel2}
+                        value={tempSExcavationLevel2}
                         onChange={(e) =>
-                          updateSection(section.name, {
-                            sExcavationLevel2: Number(e.target.value),
-                          })
+                          setTempSExcavationLevel2(Number(e.target.value))
                         }
                         className="w-24 px-2 py-1 border border-gray-300 rounded"
                         step="0.01"
@@ -348,19 +381,26 @@ export default function SectionForm({
           )}
 
           {/* 입력 완료 버튼 */}
-          <div className="mb-4">
+          <div className="mb-4 text-center">
             <button
-              onClick={() =>
-                updateSection(section.name, { isInputComplete: true })
-              }
-              className={`px-4 py-2 rounded ${
+              type="button"
+              onClick={handleInputComplete}
+              disabled={!tempSectionName}
+              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 transform active:scale-95 ${
                 section.isInputComplete
-                  ? 'bg-green-500 text-white'
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
+                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg'
+                  : tempSectionName
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg cursor-pointer'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {section.isInputComplete ? '✓ 입력 완료' : '입력 완료'}
+              {section.isInputComplete ? '✓ 입력 완료됨' : '입력 완료'}
             </button>
+            {!tempSectionName && (
+              <p className="text-sm text-red-500 mt-2">
+                구간명을 입력해주세요
+              </p>
+            )}
           </div>
 
           {/* 구간별 산출 테이블 */}

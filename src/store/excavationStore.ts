@@ -155,6 +155,8 @@ const useExcavationStore = create<ExcavationStore>()(
             area: 0,
             originalGroundLevel: 28.05,
             excavationLevel: 0.56,
+            sExcavationLevel1: 0,
+            sExcavationLevel2: 0,
             rows: [],
           };
 

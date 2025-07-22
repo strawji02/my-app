@@ -183,10 +183,9 @@ export default function DataReview({
       averageThickness,
       modifiedThickness: modifiedThickness,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    groundLevelData.average,
-    geologicalData.rawData.length,
+    columnAverages,
+    modifiedThickness,
     calculationType,
     setCalculationResults,
   ]);
