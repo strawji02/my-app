@@ -73,7 +73,8 @@ export default function SectionForm({
   useEffect(() => {
     if (section.terrainType && section.rows.length === 0) {
       const type = section.terrainType === '평면' ? 'p' : 's';
-      const area = section.area || (type === 'p' ? 213.23 : 18.01);
+      // 고정값 제거 - 사용자가 입력한 면적값 사용
+      const area = section.area || 0;
 
       const rows = [
         {
@@ -168,6 +169,13 @@ export default function SectionForm({
       tempSExcavationLevel2,
     });
     
+    // rows의 면적값도 업데이트
+    const updatedRows = section.rows.map(row => ({
+      ...row,
+      area: tempArea,
+      volume: Math.round(tempArea * row.modifiedThickness * (row.applicationRate / 100)),
+    }));
+    
     // 모든 임시 값을 store에 저장
     updateSection(section.name, {
       sectionName: tempSectionName,
@@ -178,6 +186,7 @@ export default function SectionForm({
       sExcavationLevel1: tempSExcavationLevel1,
       sExcavationLevel2: tempSExcavationLevel2,
       isInputComplete: true,
+      rows: updatedRows,
     });
   };
 
