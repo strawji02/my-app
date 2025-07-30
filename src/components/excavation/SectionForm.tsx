@@ -115,7 +115,7 @@ export default function SectionForm({
           sectionNumber: '4',
           rockType: '연암',
           workType: '크' as const,
-          item: '마사토',
+          item: '일반',
           area: area,
           modifiedThickness: 0,
           applicationRate: 100,

@@ -244,7 +244,7 @@ export default function SectionTable({ section }: SectionTableProps) {
             <th className="border px-2 py-1">구분</th>
             <th className="border px-2 py-1">암종</th>
             <th className="border px-2 py-1">작업</th>
-            <th className="border px-2 py-1">항목</th>
+            <th className="border px-2 py-1">발파공법</th>
             <th className="border px-2 py-1">면적(m²)</th>
             <th className="border px-2 py-1">
               수정층후
@@ -291,7 +291,12 @@ export default function SectionTable({ section }: SectionTableProps) {
                   className="w-full"
                 >
                   <option value="일반">일반</option>
-                  <option value="마사토">마사토</option>
+                  <option value="미진동제어발파">미진동제어발파</option>
+                  <option value="정밀진동제어발파">정밀진동제어발파</option>
+                  <option value="진동제어발파(소규모)">진동제어발파(소규모)</option>
+                  <option value="진동제어발파(중규모)">진동제어발파(중규모)</option>
+                  <option value="일반발파">일반발파</option>
+                  <option value="대규모발파">대규모발파</option>
                 </select>
               </td>
               <td className="border px-2 py-1">

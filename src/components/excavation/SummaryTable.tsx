@@ -82,7 +82,7 @@ export default function SummaryTable() {
         const workCompare = a.workType.localeCompare(b.workType);
         if (workCompare !== 0) return workCompare;
 
-        // 항목 순서: 일반 > 마사토
+        // 항목 순서: 발파공법별 정렬
         return a.item.localeCompare(b.item);
       });
 
@@ -133,7 +133,7 @@ export default function SummaryTable() {
               <tr className="bg-gray-200">
                 <th className="border border-gray-400 px-3 py-2">암종</th>
                 <th className="border border-gray-400 px-3 py-2">작업</th>
-                <th className="border border-gray-400 px-3 py-2">항목</th>
+                <th className="border border-gray-400 px-3 py-2">발파공법</th>
                 <th className="border border-gray-400 px-3 py-2">면적(m²)</th>
                 <th className="border border-gray-400 px-3 py-2">부피(m³)</th>
               </tr>
@@ -195,7 +195,7 @@ export default function SummaryTable() {
               <tr className="bg-gray-200">
                 <th className="border border-gray-400 px-3 py-2">암종</th>
                 <th className="border border-gray-400 px-3 py-2">작업</th>
-                <th className="border border-gray-400 px-3 py-2">항목</th>
+                <th className="border border-gray-400 px-3 py-2">발파공법</th>
                 <th className="border border-gray-400 px-3 py-2">면적(m²)</th>
                 <th className="border border-gray-400 px-3 py-2">부피(m³)</th>
               </tr>
