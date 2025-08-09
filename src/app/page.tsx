@@ -133,6 +133,16 @@ export default function Home() {
               </a>
             </div>
           </div>
+
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h3 className="text-lg font-medium mb-3">기타 도구</h3>
+            <Link
+              href="/manhole"
+              className="block w-full bg-green-600 text-white text-center py-3 px-4 rounded-md hover:bg-green-700 transition-colors"
+            >
+              맨홀 수량 계산
+            </Link>
+          </div>
         </div>
       </main>
     </div>
