@@ -1,4 +1,5 @@
 import { useManholeStore } from '@/store/manholeStore';
+import { ManholeInputData } from '@/types/manhole';
 
 export default function ManholeCalculationTable() {
   const { calculationResult, header, inputData } = useManholeStore();
@@ -11,8 +12,6 @@ export default function ManholeCalculationTable() {
     );
   }
 
-  // 계산식 표시를 위한 헬퍼 함수
-  const toMeter = (mm: number) => (mm / 1000).toFixed(3);
 
   return (
     <div className="space-y-6">
@@ -80,12 +79,12 @@ export default function ManholeCalculationTable() {
 }
 
 // 각 공종별 계산식을 반환하는 함수
-function getCalculationFormula(key: string, inputData: any): string {
+function getCalculationFormula(key: string, inputData: ManholeInputData): string {
   const toM = (mm: number) => (mm / 1000).toFixed(3);
   
   switch (key) {
     case '터파기':
-      return `${toM(inputData.WIDE_A)} × ${toM(inputData.WIDE_B)} × ${toM(inputData.H1)}`;
+      return `${toM(inputData.WIDE_A || 0)} × ${toM(inputData.WIDE_B || 0)} × ${toM(inputData.H1 || 0)}`;
     case '잔토처리':
       return '터파기 × 0.1';
     case '되메우기':
@@ -93,7 +92,7 @@ function getCalculationFormula(key: string, inputData: any): string {
     case '사토처리':
       return '터파기 × 0.2';
     case '기초콘크리트타설':
-      return `${toM(inputData.WIDE_A)} × ${toM(inputData.WIDE_B)} × ${toM(inputData.t6)}`;
+      return `${toM(inputData.WIDE_A || 0)} × ${toM(inputData.WIDE_B || 0)} × ${toM(inputData.t6)}`;
     case '바닥슬래브타설':
       return `π × (${toM(inputData.D/2 + inputData.t5)})² × ${toM(inputData.t5)}`;
     case '벽체타설':
@@ -111,7 +110,7 @@ function getCalculationFormula(key: string, inputData: any): string {
     case '방수':
       return `π × ${toM(inputData.D)} × ${toM(inputData.H)}`;
     case '기초잡석':
-      return `${toM(inputData.WIDE_A)} × ${toM(inputData.WIDE_B)} × 0.2`;
+      return `${toM(inputData.WIDE_A || 0)} × ${toM(inputData.WIDE_B || 0)} × 0.2`;
     default:
       return '-';
   }

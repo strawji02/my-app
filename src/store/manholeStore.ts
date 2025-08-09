@@ -121,12 +121,9 @@ export const useManholeStore = create<ManholeStore>()(
         const d = toMeter(inputData.D);
         const h = toMeter(inputData.H);
         const t1 = toMeter(inputData.t1);
-        const t2 = toMeter(inputData.t2);
         const t3 = toMeter(inputData.t3);
-        const t4 = toMeter(inputData.t4 || 0);
         const t5 = toMeter(inputData.t5);
         const t6 = toMeter(inputData.t6);
-        const t7 = toMeter(inputData.t7);
         
         // 예시 계산식 (실제 공식은 요구사항에 따라 조정 필요)
         const result: ManholeCalculationResult = {
