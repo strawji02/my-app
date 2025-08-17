@@ -1,8 +1,8 @@
 import { useManholeStore } from '@/store/manholeStore';
-import { ManholeInputData } from '@/types/manhole';
+import { ManholeInputData, ManholeSpecifications } from '@/types/manhole';
 
 export default function ManholeCalculationTable() {
-  const { calculationResult, header, inputData } = useManholeStore();
+  const { calculationResult, header, inputData, updateSpecification } = useManholeStore();
 
   if (!calculationResult) {
     return (
@@ -34,10 +34,10 @@ export default function ManholeCalculationTable() {
                 단위
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                수량
+                산출근거
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                산출근거
+                수량
               </th>
             </tr>
           </thead>
@@ -48,16 +48,21 @@ export default function ManholeCalculationTable() {
                   {item.공종}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {item.규격}
+                  <input
+                    type="text"
+                    value={item.규격}
+                    onChange={(e) => updateSpecification(key as keyof ManholeSpecifications, e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {item.단위}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                  {item.수량}
-                </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
                   {getCalculationFormula(key, inputData)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                  {item.수량}
                 </td>
               </tr>
             ))}
@@ -84,7 +89,7 @@ function getCalculationFormula(key: string, inputData: ManholeInputData): string
   
   switch (key) {
     case '터파기':
-      return `${toM(inputData.WIDE_A || 0)} × ${toM(inputData.WIDE_B || 0)} × ${toM(inputData.H1 || 0)}`;
+      return `[(${toM(inputData.WIDE_A || 0)}² × π ÷ 4) + (${toM(inputData.WIDE_B || 0)}² × π ÷ 4)] × ${toM(inputData.H1 || 0)} × 0.5`;
     case '잔토처리':
       return '터파기 × 0.1';
     case '되메우기':

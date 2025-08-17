@@ -28,30 +28,30 @@ export default function ManholeInputTable() {
 
   // 자동 계산 필드
   const calculatedFields: Array<{ key: keyof ManholeInputData; label: string; formula: string }> = [
-    { key: 'WIDE_A', label: 'WIDE A', formula: 'd0 + (t2 + t1) × 2' },
-    { key: 'WIDE_B', label: 'WIDE B', formula: 'H × 0.3 × 2 + D' },
-    { key: 't4', label: 't4', formula: 'H - (d1 + d2 + d3)' },
-    { key: 'D1', label: 'D1', formula: 'D + t3 × 2' },
-    { key: 'D2', label: 'D2', formula: 'D + t5 × 2' },
-    { key: 'H1', label: 'H1', formula: 'H + t6 + t7 + t2 + t1' },
+    { key: 'WIDE_A', label: 'WIDE A', formula: 'd2 + (d2 + d3) × 2' },
+    { key: 'WIDE_B', label: 'WIDE B', formula: 'H1 × 0.3 × 2 + WIDE A' },
+    { key: 't4', label: 't4', formula: 'H - (t1 + t2 + t3)' },
+    { key: 'D1', label: 'D1', formula: 'D + d4 × 2' },
+    { key: 'D2', label: 'D2', formula: 'D1 + d1 × 2' },
+    { key: 'H1', label: 'H1', formula: 'H + t5 + t6 + t7' },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* 사용자 입력 섹션 */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">사용자 입력 (단위: mm)</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <h4 className="text-md font-medium text-gray-900 mb-3">사용자 입력 (단위: mm)</h4>
+        <div className="grid grid-cols-2 gap-3">
           {userInputFields.map((field) => (
             <div key={field.key}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs font-medium text-gray-700 mb-1">
                 {field.label}
               </label>
               <input
                 type="number"
                 value={inputData[field.key] || ''}
                 onChange={(e) => handleInputChange(field.key, e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="0"
               />
             </div>
@@ -61,19 +61,19 @@ export default function ManholeInputTable() {
 
       {/* 자동 계산 섹션 */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">자동 계산 값 (단위: mm)</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h4 className="text-md font-medium text-gray-900 mb-3">자동 계산 값 (단위: mm)</h4>
+        <div className="space-y-2">
           {calculatedFields.map((field) => (
-            <div key={field.key} className="bg-gray-50 p-4 rounded-lg">
-              <div className="flex justify-between items-start mb-2">
-                <label className="text-sm font-medium text-gray-700">
+            <div key={field.key} className="bg-gray-50 p-2 rounded">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-xs font-medium text-gray-700">
                   {field.label}
-                </label>
-                <span className="text-sm text-gray-500">
+                </span>
+                <span className="text-xs text-gray-500">
                   = {field.formula}
                 </span>
               </div>
-              <div className="text-lg font-semibold text-blue-600">
+              <div className="text-sm font-semibold text-blue-600">
                 {inputData[field.key]?.toFixed(2) || '0.00'} mm
               </div>
             </div>
@@ -82,12 +82,12 @@ export default function ManholeInputTable() {
       </div>
 
       {/* 참고 사항 */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-yellow-800 mb-2">참고 사항</h4>
-        <ul className="text-sm text-yellow-700 space-y-1">
-          <li>• 모든 입력값은 밀리미터(mm) 단위로 입력해주세요.</li>
-          <li>• 계산된 값은 자동으로 업데이트됩니다.</li>
-          <li>• 수량 계산 시에는 미터(m) 단위로 자동 변환됩니다.</li>
+      <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+        <h5 className="text-xs font-medium text-yellow-800 mb-1">참고 사항</h5>
+        <ul className="text-xs text-yellow-700 space-y-1">
+          <li>• 모든 입력값은 mm 단위로 입력</li>
+          <li>• 계산된 값은 자동 업데이트</li>
+          <li>• 수량 계산 시 m 단위로 변환</li>
         </ul>
       </div>
     </div>

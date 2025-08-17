@@ -21,27 +21,33 @@ export default function ManholePage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">맨홀 수량 계산</h1>
         
         <div className="space-y-8">
-          {/* 제목 및 단위 입력 */}
+          {/* 공종, 규격, 단위 입력 */}
           <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">1. 제목 및 단위 설정</h2>
+            <h2 className="text-xl font-semibold mb-4">1. 공종, 규격, 단위 설정</h2>
             <ManholeHeader />
           </div>
 
-          {/* 이미지 업로드 */}
+          {/* 이미지 업로드 및 제원 입력 */}
           <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">2. 이미지 추가 (도면 삽입)</h2>
-            <ImageUploader />
-          </div>
-
-          {/* 제원 입력 */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">3. 제원 입력</h2>
-            <ManholeInputTable />
+            <h2 className="text-xl font-semibold mb-4">2. 이미지 추가 (도면 삽입) 및 3. 제원 입력</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* 이미지 업로드 - 좌측 */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">도면 이미지</h3>
+                <ImageUploader />
+              </div>
+              
+              {/* 제원 입력 - 우측 */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">제원 입력</h3>
+                <ManholeInputTable />
+              </div>
+            </div>
           </div>
 
           {/* 계산 결과 */}
           <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">4. 테이블에 입력 및 개산된 내용으로 엑셀 산출식과 동일하게 계산 및 계산식 표시</h2>
+            <h2 className="text-xl font-semibold mb-4">3. 산출 근거</h2>
             <ManholeCalculationTable />
           </div>
         </div>

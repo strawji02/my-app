@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ManholeState, ManholeInputData, ManholeCalculationResult } from '@/types/manhole';
+import { ManholeState, ManholeInputData, ManholeCalculationResult, ManholeSpecifications } from '@/types/manhole';
 
 interface ManholeStore extends ManholeState {
   // Header actions
@@ -15,6 +15,9 @@ interface ManholeStore extends ManholeState {
   // Input data actions
   updateInputData: (data: Partial<ManholeInputData>) => void;
   calculateDerivedValues: () => void;
+  
+  // Specifications actions
+  updateSpecification: (key: keyof ManholeSpecifications, value: string) => void;
   
   // Calculation actions
   calculateResults: () => void;
@@ -45,6 +48,7 @@ const initialState: ManholeState = {
     t7: 0,
     H: 0,
   },
+  specifications: {},
   calculationResult: null
 };
 
@@ -84,15 +88,16 @@ export const useManholeStore = create<ManholeStore>()(
       
       calculateDerivedValues: () => {
         const { inputData } = get();
-        const { d0, d1, d2, d3, D, t1, t2, t3, t5, t6, t7, H } = inputData;
+        const { d0, d1, d2, d3, d4, D, t1, t2, t3, t5, t6, t7, H } = inputData;
         
-        // 계산식 적용 (이미지에 표시된 공식들)
-        const WIDE_A = d0 + (t2 + t1) * 2;
-        const WIDE_B = H * 0.3 * 2 + D;
-        const t4 = H - (d1 + d2 + d3);
-        const D1 = D + t3 * 2;
-        const D2 = D + t5 * 2;
-        const H1 = H + t6 + t7 + t2 + t1;
+        // 계산식 적용 (새로운 공식들)
+        // 계산 순서 중요: H1 → WIDE_A → WIDE_B, D1 → D2
+        const H1 = H + t5 + t6 + t7;
+        const WIDE_A = d2 + (d2 + d3) * 2;
+        const WIDE_B = H1 * 0.3 * 2 + WIDE_A;
+        const t4 = H - (t1 + t2 + t3);
+        const D1 = D + d4 * 2;
+        const D2 = D1 + d1 * 2;
         
         set((state) => ({
           inputData: {
@@ -107,9 +112,19 @@ export const useManholeStore = create<ManholeStore>()(
         }));
       },
       
+      // Specifications actions
+      updateSpecification: (key, value) => {
+        set((state) => ({
+          specifications: {
+            ...state.specifications,
+            [key]: value
+          }
+        }));
+      },
+      
       // 14개 공종 수량 계산
       calculateResults: () => {
-        const { inputData } = get();
+        const { inputData, specifications } = get();
         
         // mm를 m로 변환하는 함수
         const toMeter = (mm: number) => mm / 1000;
@@ -129,31 +144,31 @@ export const useManholeStore = create<ManholeStore>()(
         const result: ManholeCalculationResult = {
           터파기: {
             공종: '터파기',
-            규격: `${wideA.toFixed(2)}×${wideB.toFixed(2)}×${h1.toFixed(2)}`,
+            규격: specifications.터파기 || `${wideA.toFixed(2)}×${wideB.toFixed(2)}×${h1.toFixed(2)}`,
             단위: 'm³',
-            수량: Number((wideA * wideB * h1).toFixed(3))
+            수량: Number((((Math.pow(wideA, 2) * Math.PI / 4) + (Math.pow(wideB, 2) * Math.PI / 4)) * h1 * 0.5).toFixed(3))
           },
           잔토처리: {
             공종: '잔토처리',
-            규격: '-',
+            규격: specifications.잔토처리 || '-',
             단위: 'm³',
             수량: Number((wideA * wideB * h1 * 0.1).toFixed(3)) // 예시: 터파기의 10%
           },
           되메우기: {
             공종: '되메우기',
-            규격: '-',
+            규격: specifications.되메우기 || '-',
             단위: 'm³',
             수량: Number((wideA * wideB * h1 * 0.8).toFixed(3)) // 예시: 터파기의 80%
           },
           사토처리: {
             공종: '사토처리',
-            규격: '-',
+            규격: specifications.사토처리 || '-',
             단위: 'm³',
             수량: Number((wideA * wideB * h1 * 0.2).toFixed(3)) // 예시: 터파기의 20%
           },
           기초콘크리트타설: {
             공종: '기초콘크리트타설',
-            규격: 'FCK=180',
+            규격: specifications.기초콘크리트타설 || 'FCK=180',
             단위: 'm³',
             수량: Number((wideA * wideB * t6).toFixed(3))
           },
@@ -189,7 +204,7 @@ export const useManholeStore = create<ManholeStore>()(
           },
           맨홀뚜껑: {
             공종: '맨홀뚜껑',
-            규격: 'KS규격',
+            규격: specifications.맨홀뚜껑 || 'KS규격',
             단위: '개소',
             수량: 1
           },

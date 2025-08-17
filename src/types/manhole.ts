@@ -59,9 +59,27 @@ export interface ManholeCalculationResult {
   기초잡석: ManholeWorkItem;
 }
 
+export interface ManholeSpecifications {
+  터파기?: string;
+  잔토처리?: string;
+  되메우기?: string;
+  사토처리?: string;
+  기초콘크리트타설?: string;
+  바닥슬래브타설?: string;
+  벽체타설?: string;
+  상부슬래브타설?: string;
+  거푸집?: string;
+  철근?: string;
+  맨홀뚜껑?: string;
+  접속관연결?: string;
+  방수?: string;
+  기초잡석?: string;
+}
+
 export interface ManholeState {
   header: ManholeHeader;
   image: ManholeImage | null;
   inputData: ManholeInputData;
+  specifications: ManholeSpecifications;
   calculationResult: ManholeCalculationResult | null;
 }
