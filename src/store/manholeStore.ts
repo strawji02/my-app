@@ -88,7 +88,7 @@ export const useManholeStore = create<ManholeStore>()(
       
       calculateDerivedValues: () => {
         const { inputData } = get();
-        const { d0, d1, d2, d3, d4, D, t1, t2, t3, t5, t6, t7, H } = inputData;
+        const { d1, d2, d3, d4, D, t1, t2, t3, t5, t6, t7, H } = inputData;
         
         // 계산식 적용 (새로운 공식들)
         // 계산 순서 중요: H1 → WIDE_A → WIDE_B, D1 → D2
